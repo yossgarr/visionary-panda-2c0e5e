@@ -1,0 +1,2937 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teman Belajar — Belajar sesuai dirimu, tumbuh setiap hari</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f2f9f3',
+              100: '#e1f3e4',
+              200: '#c5e7cc',
+              300: '#9cd5a7',
+              400: '#6fbc80',
+              500: '#4ca05f', /* primary soft green */
+              600: '#39834b',
+              700: '#2f673d',
+              800: '#295333',
+              900: '#23442c',
+            },
+            sage: {
+              50: '#f6f7f5',
+              100: '#ebede8',
+              200: '#d7dbd2',
+              300: '#bcc4b4',
+              400: '#9da891',
+              500: '#818e74',
+            },
+            leaf: '#68B984',
+            mint: '#C1E1C1',
+            sprout: '#A8DF8E',
+            warmSand: '#FDFBF7'
+          },
+          boxShadow: {
+            'soft': '0 8px 30px rgba(76, 160, 95, 0.08)',
+            'card': '0 4px 20px rgba(0, 0, 0, 0.04)',
+            'float': '0 12px 35px -8px rgba(76, 160, 95, 0.25)',
+          },
+          animation: {
+            'float-slow': 'floating 3s ease-in-out infinite',
+            'sway': 'sway 4s ease-in-out infinite',
+            'pulse-soft': 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            floating: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            sway: {
+              '0%, 100%': { transform: 'rotate(-2deg)' },
+              '50%': { transform: 'rotate(2deg)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #f7faf7;
+      color: #263329;
+      background-image: 
+        radial-gradient(at 10% 20%, rgba(193, 225, 193, 0.3) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, rgba(225, 243, 228, 0.5) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f6f2;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #b5d8bd;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8ec39a;
+    }
+    .garden-bg {
+      background: linear-gradient(180deg, #dcf0e2 0%, #ebf7ee 50%, #e2eedb 100%);
+    }
+  </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col md:flex-row overflow-x-hidden selection:bg-brand-200">
+
+  <!-- Sidebar Navigation -->
+  <aside id="main-sidebar" class="w-full md:w-64 bg-white/90 backdrop-blur-md border-r border-brand-100 flex-shrink-0 z-30 flex flex-col justify-between md:h-screen md:sticky md:top-0 transition-all duration-300">
+    <div>
+      <!-- Brand Logo -->
+      <div class="p-5 flex items-center justify-between border-b border-brand-100/60">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('beranda')">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-500 to-sprout flex items-center justify-center text-white shadow-soft text-xl">
+            🌱
+          </div>
+          <div>
+            <h1 class="font-bold text-lg text-brand-900 leading-tight tracking-tight">Teman Belajar</h1>
+            <p class="text-[11px] text-brand-600 font-medium">Tumbuh Setiap Hari</p>
+          </div>
+        </div>
+        <!-- Mobile menu toggle -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-xl text-gray-600 hover:bg-brand-50" onclick="toggleMobileMenu()">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+      </div>
+
+      <!-- User Mini Badge / Status -->
+      <div class="px-4 py-3 m-3 rounded-2xl bg-brand-50/70 border border-brand-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <span id="nav-mood-emoji" class="text-2xl p-1 bg-white rounded-xl shadow-xs">😊</span>
+          <div class="truncate">
+            <p id="nav-user-grade" class="text-xs font-semibold text-brand-800">Kelas 8 • MTs/SMP</p>
+            <p id="nav-user-mood-text" class="text-[11px] text-brand-600 truncate">Semangat Belajar</p>
+          </div>
+        </div>
+        <button onclick="openCheckinModal()" title="Ubah Kondisi Belajar" class="text-brand-600 hover:text-brand-800 text-xs px-2 py-1 bg-white rounded-lg border border-brand-200 shadow-2xs hover:bg-brand-50 transition">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav id="sidebar-nav" class="p-3 space-y-1 text-sm font-medium hidden md:block">
+        <button onclick="switchTab('beranda')" data-tab="beranda" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition text-left text-brand-700 bg-brand-100/70 font-semibold shadow-xs">
+          <i class="fa-solid fa-house-chimney w-5 text-center text-brand-600"></i>
+          <span>Beranda</span>
+        </button>
+        <button onclick="switchTab('materi')" data-tab="materi" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition text-left text-gray-600 hover:text-brand-700 hover:bg-brand-50">
+          <i class="fa-solid fa-book-open-reader w-5 text-center text-brand-500"></i>
+          <span>Materi Pelajaran</span>
+        </button>
+        <button onclick="switchTab('garden')" data-tab="garden" class="nav-item w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition text-left text-gray-600 hover:text-brand-700 hover:bg-brand-50">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-seedling w-5 text-center text-emerald-500"></i>
+            <span>Study Garden</span>
+          </div>
+          <span id="garden-badge-pill" class="text-[10px] bg-brand-500 text-white px-2 py-0.5 rounded-full font-bold">Lv.1</span>
+        </button>
+        <button onclick="switchTab('latihan')" data-tab="latihan" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition text-left text-gray-600 hover:text-brand-700 hover:bg-brand-50">
+          <i class="fa-solid fa-pen-fancy w-5 text-center text-sky-500"></i>
+          <span>Latihan Soal</span>
+        </button>
+        <button onclick="switchTab('kuis')" data-tab="kuis" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition text-left text-gray-600 hover:text-brand-700 hover:bg-brand-50">
+          <i class="fa-solid fa-brain w-5 text-center text-amber-500"></i>
+          <span>Kuis Cepat</span>
+        </button>
+        <button onclick="switchTab('jadwal')" data-tab="jadwal" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition text-left text-gray-600 hover:text-brand-700 hover:bg-brand-50">
+          <i class="fa-solid fa-calendar-days w-5 text-center text-teal-500"></i>
+          <span>Jadwal Belajar</span>
+        </button>
+        <button onclick="switchTab('todo')" data-tab="todo" class="nav-item w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition text-left text-gray-600 hover:text-brand-700 hover:bg-brand-50">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-circle-check w-5 text-center text-indigo-500"></i>
+            <span>To-do List</span>
+          </div>
+          <span id="todo-pending-count" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-semibold">2</span>
+        </button>
+        <button onclick="switchTab('prestasi')" data-tab="prestasi" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition text-left text-gray-600 hover:text-brand-700 hover:bg-brand-50">
+          <i class="fa-solid fa-trophy w-5 text-center text-yellow-500"></i>
+          <span>Prestasi & Poin</span>
+        </button>
+        <button onclick="switchTab('profil')" data-tab="profil" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition text-left text-gray-600 hover:text-brand-700 hover:bg-brand-50">
+          <i class="fa-solid fa-user-gear w-5 text-center text-sage-500"></i>
+          <span>Profil Saya</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Sidebar Footer Plant Stats -->
+    <div class="p-4 border-t border-brand-100 hidden md:block bg-gradient-to-b from-transparent to-brand-50/50">
+      <div class="bg-white p-3 rounded-2xl border border-brand-100 shadow-2xs">
+        <div class="flex justify-between items-center text-xs mb-1.5 font-semibold text-brand-900">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-droplet text-blue-500"></i> Air: <span id="sidebar-water">3</span></span>
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-sun text-amber-500"></i> Sinar: <span id="sidebar-sun">2</span></span>
+        </div>
+        <div class="w-full bg-brand-100 h-2 rounded-full overflow-hidden">
+          <div id="sidebar-exp-bar" class="bg-gradient-to-r from-brand-400 to-brand-500 h-full w-[35%] rounded-full transition-all duration-500"></div>
+        </div>
+        <p class="text-[10px] text-gray-500 mt-1 text-center">Beri air & sinar agar pohon mekar</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col min-h-screen overflow-y-auto">
+    <!-- Top Bar -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-20 border-b border-brand-100 px-6 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span id="page-icon" class="text-2xl">🌱</span>
+        <div>
+          <h2 id="page-title" class="font-bold text-gray-800 text-lg leading-snug">Beranda Teman Belajar</h2>
+          <p id="page-subtitle" class="text-xs text-gray-500">Belajar sesuai dirimu, tumbuh setiap hari.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- Quick Mood Button -->
+        <button onclick="openCheckinModal()" class="hidden sm:flex items-center gap-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 px-3.5 py-1.5 rounded-full text-xs font-semibold transition">
+          <span id="header-mood-icon">😊</span>
+          <span>Check-in Mood</span>
+        </button>
+        <!-- Points Pill -->
+        <div class="flex items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full text-xs font-bold">
+          <i class="fa-solid fa-seedling text-brand-500"></i>
+          <span id="topbar-points">120 Poin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- App View Container -->
+    <div class="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+
+      <!-- ======================================================== -->
+      <!-- TAB 1: BERANDA -->
+      <!-- ======================================================== -->
+      <section id="view-beranda" class="space-y-6">
+        <!-- Welcome Hero Banner -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-600 via-brand-500 to-emerald-600 text-white p-6 sm:p-8 shadow-card">
+          <!-- decorative circle shapes -->
+          <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+          <div class="absolute right-20 top-2 w-32 h-32 bg-emerald-300/20 rounded-full blur-lg pointer-events-none"></div>
+
+          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="max-w-xl space-y-2">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-xs font-semibold text-white/90">
+                <span id="hero-tagline-icon">✨</span>
+                <span id="hero-tagline-text">Kurikulum Merdeka • Kelas 8 MTs/SMP</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight" id="hero-greeting">
+                Halo, Teman Baik! 👋
+              </h2>
+              <p class="text-brand-50 text-sm leading-relaxed" id="hero-advice">
+                Kamu sedang merasa <span class="font-bold underline" id="hero-mood-name">Semangat</span>. Ini saat yang pas buat memahami konsep baru secara menyeluruh!
+              </p>
+              <div class="pt-2 flex flex-wrap gap-2.5">
+                <button onclick="startAdaptiveSession()" class="px-5 py-2.5 bg-white text-brand-700 hover:bg-brand-50 font-bold rounded-2xl shadow-soft text-xs sm:text-sm flex items-center gap-2 transition hover:scale-105 active:scale-95">
+                  <i class="fa-solid fa-play"></i> Mulai Sesi Rekomendasi
+                </button>
+                <button onclick="openCheckinModal()" class="px-4 py-2.5 bg-brand-700/60 hover:bg-brand-700 text-white rounded-2xl text-xs sm:text-sm font-medium backdrop-blur-sm transition">
+                  <i class="fa-solid fa-arrows-rotate mr-1"></i> Ganti Mood / Kelas
+                </button>
+              </div>
+            </div>
+
+            <!-- Mini Garden Preview Box -->
+            <div class="bg-white/15 backdrop-blur-md p-4 rounded-2xl border border-white/20 flex items-center gap-4 min-w-[240px]">
+              <div class="w-16 h-16 rounded-2xl bg-white/30 flex items-center justify-center text-4xl shadow-inner animate-float-slow" id="hero-garden-icon">
+                🪴
+              </div>
+              <div>
+                <p class="text-[11px] text-brand-100 font-semibold uppercase tracking-wider">Status Pohonmu</p>
+                <h4 class="font-bold text-base text-white" id="hero-plant-stage">Pohon Sedang Mekar</h4>
+                <p class="text-xs text-brand-100" id="hero-plant-level">Level 2 • 65/100 EXP</p>
+                <button onclick="switchTab('garden')" class="text-[11px] text-white underline font-semibold mt-1 inline-block hover:text-sprout">
+                  Kunjungi Taman &rarr;
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Adaptive Recommendation Card (Crucial Feature) -->
+        <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4 mb-5">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold uppercase tracking-wider">Rekomendasi Personal</span>
+                <span class="text-xs text-gray-400">• Disesuaikan dengan kondisimu</span>
+              </div>
+              <h3 class="text-lg font-bold text-gray-800 mt-1" id="rec-title">🔬 IPA: Sistem Pernapasan Manusia</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="rec-style-badge" class="text-xs bg-brand-50 text-brand-700 px-3 py-1 rounded-xl font-semibold border border-brand-200">
+                📖 Membaca Santai
+              </span>
+            </div>
+          </div>
+
+          <!-- Dynamic Adaptive Content Box -->
+          <div id="rec-box-body" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Adaptive note & topic details -->
+            <div class="lg:col-span-2 space-y-4">
+              <div id="adaptive-note" class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-3">
+                <i class="fa-solid fa-lightbulb text-amber-600 text-base mt-0.5"></i>
+                <div id="adaptive-note-text">
+                  Karena kamu sedang bersemangat, yuk pelajari konsep organ pernapasan sekaligus latihan 5 soal pemahaman untuk memupuk pohon belajarmu!
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div class="p-3 rounded-2xl bg-brand-50/50 border border-brand-100 flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-brand-600 font-bold shadow-xs">
+                    ⏱️
+                  </div>
+                  <div>
+                    <p class="text-gray-400 font-medium">Estimasi Waktu</p>
+                    <p class="font-bold text-gray-800" id="rec-time">10 Menit</p>
+                  </div>
+                </div>
+                <div class="p-3 rounded-2xl bg-brand-50/50 border border-brand-100 flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-blue-600 font-bold shadow-xs">
+                    💧
+                  </div>
+                  <div>
+                    <p class="text-gray-400 font-medium">Hadiah Siraman</p>
+                    <p class="font-bold text-gray-800">+2 Ember Air</p>
+                  </div>
+                </div>
+                <div class="p-3 rounded-2xl bg-brand-50/50 border border-brand-100 flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-amber-500 font-bold shadow-xs">
+                    ⭐
+                  </div>
+                  <div>
+                    <p class="text-gray-400 font-medium">Bonus EXP</p>
+                    <p class="font-bold text-gray-800">+25 EXP</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                <h4 class="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Yang Akan Kamu Pelajari:</h4>
+                <ul class="text-sm text-gray-700 space-y-1.5" id="rec-preview-bullets">
+                  <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500 text-xs"></i> Struktur & fungsi alveolus dalam pertukaran gas.</li>
+                  <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500 text-xs"></i> Mekanisme inspirasi dan ekspirasi dada vs perut.</li>
+                  <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500 text-xs"></i> Contoh kasus gangguan pernapasan sehari-hari.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Right: Action CTA & Quick Visual -->
+            <div class="flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-brand-50 to-white border border-brand-100">
+              <div class="text-center space-y-3">
+                <div class="w-20 h-20 mx-auto rounded-3xl bg-brand-100 flex items-center justify-center text-4xl shadow-soft">
+                  <span id="rec-subject-avatar">🔬</span>
+                </div>
+                <div>
+                  <h4 class="font-bold text-brand-900" id="rec-card-topic">Sistem Pernapasan</h4>
+                  <p class="text-xs text-gray-500" id="rec-card-subject">IPA • Kurikulum Merdeka</p>
+                </div>
+              </div>
+              <div class="space-y-2 mt-4">
+                <button onclick="openMateriDetailFromCurrentRec()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm shadow-soft transition flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-book-open"></i> Pelajari Materi Sekarang
+                </button>
+                <button onclick="startQuickQuizFromCurrentRec()" class="w-full py-2.5 bg-white hover:bg-brand-50 text-brand-700 border border-brand-200 font-semibold rounded-xl text-xs transition">
+                  <i class="fa-solid fa-bolt mr-1"></i> Coba Soal Pemahaman Saja
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard 3 Columns: Quick Garden, Daily Quote, Mini Tasks -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Mini Garden Widget -->
+          <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-card flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-seedling text-emerald-500"></i> Study Garden Hari Ini
+              </h4>
+              <span class="text-xs text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full font-semibold" id="mini-garden-level">Level 2</span>
+            </div>
+            
+            <div class="my-4 p-4 rounded-2xl garden-bg border border-brand-200/60 text-center relative overflow-hidden">
+              <div class="absolute -top-4 -right-4 w-16 h-16 bg-amber-300/30 rounded-full blur-md"></div>
+              <div class="text-5xl my-2 inline-block animate-sway" id="mini-plant-visual">🌿</div>
+              <p class="text-xs font-bold text-brand-900" id="mini-plant-status-text">Tanamanmu sedang bertumbuh segar!</p>
+              <p class="text-[11px] text-brand-700/80 mt-0.5">Tak ada tanaman mati, hanya istirahat jika kamu sibuk.</p>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs text-gray-600">
+                <span>Kemajuan Menuju Level Berikutnya</span>
+                <span class="font-bold text-brand-700" id="mini-garden-exp-text">65%</span>
+              </div>
+              <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div id="mini-garden-exp-bar" class="bg-brand-500 h-full rounded-full transition-all duration-300" style="width: 65%;"></div>
+              </div>
+              <button onclick="switchTab('garden')" class="w-full mt-2 py-2 text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-xl transition">
+                Siram & Beri Sinar &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Quote & Affirmation -->
+          <div class="bg-gradient-to-br from-brand-500 to-teal-700 text-white rounded-3xl p-5 shadow-card flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 text-xs text-brand-100 mb-3">
+                <i class="fa-solid fa-quote-left text-brand-200"></i>
+                <span class="font-semibold uppercase tracking-wider">Pesan Buat Hari Ini</span>
+              </div>
+              <p class="text-base font-medium leading-relaxed italic text-white/95" id="daily-quote">
+                "Setiap usaha kecil yang kamu lakukan hari ini adalah air yang membuat tanaman masa depanmu berbunga indah."
+              </p>
+            </div>
+            <div class="pt-4 border-t border-white/20 flex items-center justify-between text-xs text-brand-100">
+              <span id="daily-quote-author">— Teman Belajar</span>
+              <button onclick="shuffleDailyQuote()" class="hover:text-white p-1 rounded-md" title="Ganti kutipan">
+                <i class="fa-solid fa-shuffle"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Today To-Do -->
+          <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-card flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-indigo-500"></i> Tugas Terdekat
+              </h4>
+              <button onclick="switchTab('todo')" class="text-xs text-brand-600 hover:underline">Kelola</button>
+            </div>
+            <div class="space-y-2.5" id="home-todo-list">
+              <!-- Rendered via JS -->
+            </div>
+            <button onclick="switchTab('todo')" class="w-full mt-3 py-2 text-xs font-semibold text-gray-600 hover:text-brand-700 bg-gray-50 hover:bg-brand-50 border border-gray-200 rounded-xl transition">
+              + Tambah Tugas Baru
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 Subjects Quick Access Grid -->
+        <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-card">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-gray-800 text-base">Pilih Mata Pelajaran</h3>
+              <p class="text-xs text-gray-500">Kurikulum Merdeka untuk <span id="quick-subject-grade" class="font-semibold text-brand-700">Kelas 8</span></p>
+            </div>
+            <button onclick="switchTab('materi')" class="text-xs font-semibold text-brand-600 hover:text-brand-800">
+              Lihat Semua Materi &rarr;
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5" id="quick-subject-grid">
+            <!-- Dynamic Subject Cards -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 2: MATERI PELAJARAN (KURIKULUM MERDEKA LENGKAP) -->
+      <!-- ======================================================== -->
+      <section id="view-materi" class="hidden space-y-6">
+        <!-- Grade Filter & Subject Filter Bar -->
+        <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-card flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1">Kelas:</span>
+            <button onclick="filterGrade(7)" class="grade-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition border border-brand-200 text-brand-700 hover:bg-brand-50" data-grade="7">Kelas 7</button>
+            <button onclick="filterGrade(8)" class="grade-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition bg-brand-600 text-white shadow-xs" data-grade="8">Kelas 8</button>
+            <button onclick="filterGrade(9)" class="grade-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition border border-brand-200 text-brand-700 hover:bg-brand-50" data-grade="9">Kelas 9</button>
+          </div>
+
+          <!-- Subject Tabs -->
+          <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+            <button onclick="filterSubject('all')" class="subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-100 text-brand-800" data-subj="all">Semua Mapel</button>
+            <button onclick="filterSubject('matematika')" class="subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-brand-50" data-subj="matematika">➗ MTK</button>
+            <button onclick="filterSubject('ipa')" class="subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-brand-50" data-subj="ipa">🔬 IPA</button>
+            <button onclick="filterSubject('inggris')" class="subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-brand-50" data-subj="inggris">🇬🇧 B. Inggris</button>
+            <button onclick="filterSubject('indonesia')" class="subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-brand-50" data-subj="indonesia">🇮🇩 B. Indo</button>
+            <button onclick="filterSubject('ips')" class="subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-brand-50" data-subj="ips">🌏 IPS</button>
+          </div>
+        </div>
+
+        <!-- Materials Grid List -->
+        <div id="materi-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 3: STUDY GARDEN (FITUR UTAMA) -->
+      <!-- ======================================================== -->
+      <section id="view-garden" class="hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Plant Canvas Interactive View -->
+          <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-brand-100 shadow-card flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-xs font-bold text-brand-600 bg-brand-50 px-3 py-1 rounded-full border border-brand-200">Study Garden Sanctuary</span>
+                <h3 class="text-xl font-bold text-gray-800 mt-1">Kebun Belajar Virtualmu</h3>
+              </div>
+              <div class="text-right">
+                <span id="garden-stage-name" class="font-extrabold text-brand-700 text-base">Tunas Muda (Level 2)</span>
+                <p class="text-xs text-gray-400">Status: Tumbuh Sehat</p>
+              </div>
+            </div>
+
+            <!-- Visual Ecosystem Canvas/Card -->
+            <div class="relative w-full h-80 sm:h-96 rounded-3xl garden-bg border-2 border-brand-200/70 flex flex-col items-center justify-end p-6 overflow-hidden shadow-inner">
+              <!-- Sky Sun & Clouds -->
+              <div class="absolute top-4 right-6 flex items-center gap-2 animate-pulse-soft">
+                <div class="w-14 h-14 rounded-full bg-amber-400/90 shadow-[0_0_30px_rgba(251,191,36,0.6)] flex items-center justify-center text-2xl">
+                  ☀️
+                </div>
+              </div>
+              <div class="absolute top-6 left-8 text-3xl opacity-60">☁️</div>
+              <div class="absolute top-12 left-32 text-2xl opacity-40">☁️</div>
+
+              <!-- Butterflies / Pollen floating -->
+              <div class="absolute top-28 left-20 text-xl animate-float-slow">🦋</div>
+              <div class="absolute top-36 right-24 text-lg animate-float-slow">🐝</div>
+
+              <!-- Central Big Plant Visual -->
+              <div class="relative z-10 text-center flex flex-col items-center">
+                <!-- Floating Speech Bubble from Plant -->
+                <div id="plant-speech-bubble" class="mb-3 px-4 py-2 bg-white/95 backdrop-blur-md rounded-2xl shadow-soft text-xs font-medium text-brand-900 border border-brand-100 max-w-xs transition-all duration-300 transform">
+                  "Terima kasih sudah belajar hari ini! Aku tumbuh semakin segar 🌱"
+                </div>
+
+                <!-- Plant Graphic SVG / Emojis based on Level -->
+                <div id="main-plant-graphic" class="text-7xl sm:text-8xl transition-all duration-500 transform hover:scale-110 select-none cursor-pointer filter drop-shadow-lg animate-sway">
+                  🌿
+                </div>
+
+                <!-- Soil / Pot Mound -->
+                <div class="w-44 h-8 bg-amber-900/40 rounded-full blur-[2px] mt-2"></div>
+                <div class="w-48 h-6 bg-gradient-to-r from-amber-800 via-amber-700 to-amber-800 rounded-t-2xl shadow-md flex items-center justify-center text-[10px] text-amber-200 font-bold tracking-widest uppercase">
+                  POT SUBUR
+                </div>
+              </div>
+
+              <!-- Ground Grass Layer -->
+              <div class="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-emerald-600/30 to-transparent pointer-events-none"></div>
+            </div>
+
+            <!-- Nurture Action Buttons -->
+            <div class="mt-6 pt-4 border-t border-brand-100 flex flex-wrap items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <div class="text-xs">
+                  <span class="text-gray-500">Persediaan Sumber Daya:</span>
+                  <div class="flex items-center gap-3 mt-1 font-bold">
+                    <span class="text-blue-600 flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200"><i class="fa-solid fa-droplet"></i> <span id="garden-water-count">3</span> Ember</span>
+                    <span class="text-amber-600 flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200"><i class="fa-solid fa-sun"></i> <span id="garden-sun-count">2</span> Sinar</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button onclick="nurturePlant('water')" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white font-bold rounded-2xl shadow-soft text-xs sm:text-sm flex items-center gap-2 transition">
+                  <i class="fa-solid fa-shower"></i> Siram Tanaman
+                </button>
+                <button onclick="nurturePlant('sun')" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold rounded-2xl shadow-soft text-xs sm:text-sm flex items-center gap-2 transition">
+                  <i class="fa-solid fa-sun"></i> Beri Sinar Mentari
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Garden Progression & Philosophy Side Card -->
+          <div class="space-y-6">
+            <!-- Philosophy Card -->
+            <div class="bg-gradient-to-br from-brand-50 to-emerald-50 rounded-3xl p-5 border border-brand-200 shadow-card">
+              <h4 class="font-bold text-brand-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-heart-pulse text-red-500"></i> Filosofi Pohon Belajar
+              </h4>
+              <p class="text-xs text-brand-800/90 leading-relaxed mt-2">
+                Di Teman Belajar, <strong>tanamanmu tidak akan pernah mati</strong> meskipun kamu libur berhari-hari. Ia hanya beristirahat dengan sabar menunggumu kembali. Setiap usaha belajarmu adalah nutrisi untuk masa depan!
+              </p>
+            </div>
+
+            <!-- Stages Showcase -->
+            <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-card space-y-3">
+              <h4 class="font-bold text-gray-800 text-sm">Tahapan Evolusi Tanaman</h4>
+              <div class="space-y-2.5 text-xs">
+                <div id="stage-card-1" class="p-3 rounded-2xl border flex items-center gap-3 bg-brand-50 border-brand-300">
+                  <span class="text-2xl">🌱</span>
+                  <div>
+                    <p class="font-bold text-gray-800">1. Bibit Kecil (0-50 EXP)</p>
+                    <p class="text-gray-500 text-[11px]">Langkah pertama untuk memulai kebiasaan.</p>
+                  </div>
+                </div>
+                <div id="stage-card-2" class="p-3 rounded-2xl border flex items-center gap-3 bg-white border-gray-100">
+                  <span class="text-2xl">🌿</span>
+                  <div>
+                    <p class="font-bold text-gray-800">2. Tunas Muda (51-150 EXP)</p>
+                    <p class="text-gray-500 text-[11px]">Mulai konsisten dan bertumbuh kuat.</p>
+                  </div>
+                </div>
+                <div id="stage-card-3" class="p-3 rounded-2xl border flex items-center gap-3 bg-white border-gray-100">
+                  <span class="text-2xl">🪴</span>
+                  <div>
+                    <p class="font-bold text-gray-800">3. Tanaman Rimbun (151-300 EXP)</p>
+                    <p class="text-gray-500 text-[11px]">Pemahaman materi semakin mendalam.</p>
+                  </div>
+                </div>
+                <div id="stage-card-4" class="p-3 rounded-2xl border flex items-center gap-3 bg-white border-gray-100">
+                  <span class="text-2xl">🌳</span>
+                  <div>
+                    <p class="font-bold text-gray-800">4. Pohon Pelindung (301-500 EXP)</p>
+                    <p class="text-gray-500 text-[11px]">Fondasi ilmu yang kokoh dan bijaksana.</p>
+                  </div>
+                </div>
+                <div id="stage-card-5" class="p-3 rounded-2xl border flex items-center gap-3 bg-white border-gray-100">
+                  <span class="text-2xl">🌸</span>
+                  <div>
+                    <p class="font-bold text-gray-800">5. Pohon Bunga & Buah (500+ EXP)</p>
+                    <p class="text-gray-500 text-[11px]">Menginspirasi teman-teman lainnya.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Garden Log -->
+            <div class="bg-white rounded-3xl p-5 border border-brand-100 shadow-card">
+              <h4 class="font-bold text-gray-800 text-sm mb-3">Catatan Perawatan Kebun</h4>
+              <ul id="garden-activity-log" class="text-xs text-gray-600 space-y-2">
+                <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-500"></span> Check-in pagi hari ini (+1 Air)</li>
+                <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Menyelesaikan Kuis Cepat (+1 Sinar)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 4: LATIHAN SOAL & PEMBAHASAN -->
+      <!-- ======================================================== -->
+      <section id="view-latihan" class="hidden space-y-6">
+        <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-card">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-4 mb-6">
+            <div>
+              <span class="text-xs font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">Mode Latihan Terpandu</span>
+              <h3 class="text-xl font-bold text-gray-800 mt-1" id="quiz-runner-title">Latihan Soal Pemahaman</h3>
+              <p class="text-xs text-gray-500" id="quiz-runner-subtitle">Pilih jawaban yang paling tepat. Dapatkan pembahasan lengkap & poin tanaman!</p>
+            </div>
+            <!-- Quiz Progress -->
+            <div class="flex items-center gap-3">
+              <div class="text-right">
+                <span class="text-xs text-gray-400">Pertanyaan</span>
+                <p class="text-sm font-bold text-gray-800" id="quiz-counter">1 dari 5</p>
+              </div>
+              <div class="w-28 bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                <div id="quiz-progress-fill" class="bg-sky-500 h-full rounded-full transition-all duration-300" style="width: 20%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Question Container -->
+          <div id="quiz-active-box" class="space-y-6">
+            <div class="p-5 rounded-2xl bg-gray-50 border border-gray-200">
+              <p class="text-xs font-bold text-brand-700 uppercase tracking-wider mb-1" id="quiz-question-category">IPA • KELAS 8</p>
+              <h4 class="text-base sm:text-lg font-semibold text-gray-900 leading-snug" id="quiz-question-text">
+                Di manakah tempat terjadinya pertukaran gas oksigen (O₂) dan karbon dioksida (CO₂) di dalam paru-paru manusia?
+              </h4>
+            </div>
+
+            <!-- Answer Options -->
+            <div class="space-y-3" id="quiz-options-container">
+              <!-- Injected by JS -->
+            </div>
+
+            <!-- Explanation Box (Appears after answer) -->
+            <div id="quiz-explanation-box" class="hidden p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-sm space-y-2">
+              <div class="flex items-center gap-2 font-bold text-emerald-800">
+                <i class="fa-solid fa-circle-check text-lg"></i>
+                <span id="quiz-result-title">Jawaban Benar!</span>
+              </div>
+              <p id="quiz-explanation-text" class="text-xs sm:text-sm text-emerald-900/90 leading-relaxed">
+                Pembahasan: Pertukaran oksigen dan karbondioksida terjadi di alveolus melalui proses difusi kapiler darah.
+              </p>
+            </div>
+
+            <!-- Quiz Navigation Bottom -->
+            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+              <button onclick="resetCurrentQuiz()" class="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Ulangi Kuis
+              </button>
+              <button id="quiz-next-btn" onclick="nextQuestion()" disabled class="px-6 py-2.5 bg-gray-300 text-gray-600 cursor-not-allowed font-bold rounded-xl text-sm transition">
+                Soal Berikutnya &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- Quiz Completed Card (hidden by default) -->
+          <div id="quiz-completed-box" class="hidden text-center py-10 space-y-4">
+            <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-4xl mx-auto shadow-soft">
+              🏆
+            </div>
+            <h3 class="text-2xl font-black text-gray-800">Latihan Selesai!</h3>
+            <p class="text-sm text-gray-600 max-w-md mx-auto" id="quiz-summary-score">
+              Kamu berhasil menjawab dengan benar! Pohon belajarmu menerima nutrisi air dan sinar matahari baru.
+            </p>
+            <div class="flex justify-center gap-3 pt-3">
+              <button onclick="switchTab('garden')" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-2xl text-xs sm:text-sm transition">
+                🌱 Lihat Pertumbuhan Kebun
+              </button>
+              <button onclick="switchTab('materi')" class="px-5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold rounded-2xl text-xs sm:text-sm transition">
+                Pilih Materi Lain
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 5: KUIS CEPAT -->
+      <!-- ======================================================== -->
+      <section id="view-kuis" class="hidden space-y-6">
+        <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-card">
+          <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+            <div>
+              <span class="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">Flash Quiz Mode</span>
+              <h3 class="text-xl font-bold text-gray-800 mt-1">Kuis Cepat 3 Menit</h3>
+              <p class="text-xs text-gray-500">Uji ingatan konsep kilat untuk menyegarkan pikiran tanpa stres.</p>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 text-amber-800 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-2">
+              <i class="fa-solid fa-stopwatch"></i>
+              <span id="quick-quiz-timer">03:00</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Flash Card Mode -->
+            <div class="p-6 rounded-3xl bg-gradient-to-br from-brand-50 to-mint/30 border border-brand-200 flex flex-col justify-between min-h-[260px]">
+              <div class="flex justify-between items-center text-xs text-brand-800 font-bold">
+                <span>KARTU KONSEP KILAT</span>
+                <span id="flashcard-badge">Matematika</span>
+              </div>
+              <div class="text-center py-6">
+                <h4 id="flashcard-question" class="text-lg font-bold text-brand-900 leading-snug">
+                  "Rumus Teorema Pythagoras untuk segitiga siku-siku dengan sisi miring c adalah..."
+                </h4>
+                <p id="flashcard-answer" class="hidden mt-4 p-3 bg-white rounded-xl shadow-xs font-bold text-emerald-700 text-base">
+                  c² = a² + b²
+                </p>
+              </div>
+              <div class="flex gap-2">
+                <button id="flashcard-btn-reveal" onclick="toggleFlashcardAnswer()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-xs transition">
+                  <i class="fa-regular fa-eye mr-1"></i> Buka Kunci Jawaban
+                </button>
+                <button onclick="nextFlashcard()" class="w-full py-2.5 bg-white hover:bg-brand-50 text-brand-700 border border-brand-200 font-bold rounded-xl text-xs transition">
+                  Kartu Berikutnya &rarr;
+                </button>
+              </div>
+            </div>
+
+            <!-- Fast Challenge Stats & Perks -->
+            <div class="space-y-4">
+              <div class="p-5 rounded-3xl bg-white border border-gray-200 shadow-2xs">
+                <h4 class="font-bold text-gray-800 text-sm mb-2 flex items-center gap-2">
+                  <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> Manfaat Kuis Cepat
+                </h4>
+                <ul class="text-xs text-gray-600 space-y-2">
+                  <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Melatih memori jangka panjang (Active Recall).</li>
+                  <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Sangat cocok saat mood sedang lelah atau pusing.</li>
+                  <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Tiap 3 kartu selesai memberi +1 Sinar Mentari ☀️.</li>
+                </ul>
+              </div>
+
+              <div class="p-5 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">Skor Kuis Hari Ini</p>
+                  <h3 class="text-2xl font-black text-emerald-950 mt-0.5" id="flash-card-score">4 Kartu Diingat</h3>
+                </div>
+                <button onclick="claimQuickWaterReward()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition">
+                  Klaim Air 💧
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 6: JADWAL BELAJAR -->
+      <!-- ======================================================== -->
+      <section id="view-jadwal" class="hidden space-y-6">
+        <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4 mb-6">
+            <div>
+              <span class="text-xs font-bold text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-200">Agenda Mandiri</span>
+              <h3 class="text-xl font-bold text-gray-800 mt-1">Jadwal Belajar Mingguan</h3>
+              <p class="text-xs text-gray-500">Atur waktu belajarmu santai namun teratur agar pohonmu tidak haus.</p>
+            </div>
+            <button onclick="openAddScheduleModal()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-2xl shadow-soft flex items-center gap-2 transition">
+              <i class="fa-solid fa-plus"></i> Tambah Jadwal
+            </button>
+          </div>
+
+          <!-- Schedule Grid (Senin - Jumat) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="schedule-week-grid">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 7: TO-DO LIST -->
+      <!-- ======================================================== -->
+      <section id="view-todo" class="hidden space-y-6">
+        <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4 mb-6">
+            <div>
+              <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200">Manajemen Target</span>
+              <h3 class="text-xl font-bold text-gray-800 mt-1">Daftar Tugas & PR Sekolah</h3>
+              <p class="text-xs text-gray-500">Centang tugas yang selesai untuk mendapatkan air penyiram taman!</p>
+            </div>
+            <!-- Add task inline form -->
+            <form onsubmit="handleAddTask(event)" class="flex gap-2 w-full sm:w-auto">
+              <input type="text" id="new-todo-input" placeholder="Tulis tugas baru (cth: PR Matematika no 1-5)..." required class="text-xs px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-brand-500 w-full sm:w-72" />
+              <button type="submit" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shrink-0 transition">
+                Tambah
+              </button>
+            </form>
+          </div>
+
+          <!-- Tasks List -->
+          <div class="space-y-3" id="todo-container-list">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 8: PRESTASI & POIN -->
+      <!-- ======================================================== -->
+      <section id="view-prestasi" class="hidden space-y-6">
+        <!-- Top Stats Banner -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div class="p-5 rounded-3xl bg-white border border-brand-100 shadow-card text-center">
+            <span class="text-3xl">🌱</span>
+            <p class="text-xs text-gray-400 mt-2 font-medium">Total EXP</p>
+            <h4 class="text-2xl font-black text-brand-800" id="stat-total-exp">120 EXP</h4>
+          </div>
+          <div class="p-5 rounded-3xl bg-white border border-brand-100 shadow-card text-center">
+            <span class="text-3xl">🔥</span>
+            <p class="text-xs text-gray-400 mt-2 font-medium">Streak Belajar</p>
+            <h4 class="text-2xl font-black text-amber-600" id="stat-streak">3 Hari</h4>
+          </div>
+          <div class="p-5 rounded-3xl bg-white border border-brand-100 shadow-card text-center">
+            <span class="text-3xl">💧</span>
+            <p class="text-xs text-gray-400 mt-2 font-medium">Air Diberikan</p>
+            <h4 class="text-2xl font-black text-blue-600" id="stat-water-given">14 Kali</h4>
+          </div>
+          <div class="p-5 rounded-3xl bg-white border border-brand-100 shadow-card text-center">
+            <span class="text-3xl">🏅</span>
+            <p class="text-xs text-gray-400 mt-2 font-medium">Lencana Terbuka</p>
+            <h4 class="text-2xl font-black text-emerald-600" id="stat-badges-unlocked">4 dari 8</h4>
+          </div>
+        </div>
+
+        <!-- Badges Shelf -->
+        <div class="bg-white rounded-3xl p-6 border border-brand-100 shadow-card space-y-4">
+          <div class="border-b border-gray-100 pb-3">
+            <h3 class="text-lg font-bold text-gray-800">Rak Lencana Kehormatan</h3>
+            <p class="text-xs text-gray-500">Kumpulkan semua tanda penghargaan dari ketekunan belajarmu.</p>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="badges-shelf-grid">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 9: PROFIL SAYA -->
+      <!-- ======================================================== -->
+      <section id="view-profil" class="hidden space-y-6">
+        <div class="max-w-3xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-brand-100 shadow-card space-y-6">
+          <div class="flex flex-col sm:flex-row items-center gap-5 border-b border-gray-100 pb-6">
+            <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-brand-500 to-sprout flex items-center justify-center text-4xl shadow-soft text-white">
+              🧑‍🎓
+            </div>
+            <div class="text-center sm:text-left space-y-1">
+              <div class="flex items-center justify-center sm:justify-start gap-2">
+                <h3 class="text-xl font-bold text-gray-800" id="profile-user-name">Siswa MTs / SMP Hebat</h3>
+                <span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-800 text-[10px] font-bold" id="profile-grade-pill">Kelas 8</span>
+              </div>
+              <p class="text-xs text-gray-500" id="profile-motto">"Belajar sesuai diriku, tumbuh setiap hari."</p>
+              <p class="text-xs text-brand-600 font-semibold flex items-center justify-center sm:justify-start gap-1">
+                <i class="fa-solid fa-award"></i> Level Kebun: <span id="profile-garden-level">2 (Tunas Muda)</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Configuration summary -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="p-4 rounded-2xl bg-brand-50/60 border border-brand-100">
+              <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Gaya Belajar Favorit</span>
+              <p class="font-bold text-brand-900 text-sm mt-1" id="profile-style-text">📖 Membaca Materi Santai</p>
+              <p class="text-gray-500 mt-1">Sistem menampilkan ringkasan padat dan diagram visual jelas.</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200">
+              <span class="text-amber-700 font-semibold uppercase tracking-wider text-[10px]">Mood Terakhir</span>
+              <p class="font-bold text-amber-950 text-sm mt-1" id="profile-mood-text">😊 Semangat</p>
+              <p class="text-gray-500 mt-1">Beban belajar disesuaikan dengan energi mentalmu.</p>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-gray-100 flex flex-wrap gap-3 justify-between items-center">
+            <button onclick="openCheckinModal()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition">
+              <i class="fa-solid fa-sliders mr-1.5"></i> Ulangi Kuesioner Adaptif (Check-in)
+            </button>
+            <button onclick="resetAllAppData()" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl text-xs font-semibold transition">
+              <i class="fa-solid fa-trash-can mr-1"></i> Reset Seluruh Data
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: ONBOARDING / ADAPTIVE CHECK-IN FLOW (4 LANGKAH) -->
+  <!-- ======================================================== -->
+  <div id="checkin-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-brand-100 max-h-[92vh] overflow-y-auto space-y-6 transform transition-all">
+      
+      <!-- Stepper Header -->
+      <div class="flex items-center justify-between border-b border-brand-100 pb-4">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full" id="step-badge">Langkah 1 dari 4</span>
+          <h3 class="text-xl font-bold text-gray-900 mt-1" id="checkin-step-title">👋 Kamu sekarang kelas berapa?</h3>
+        </div>
+        <button onclick="closeCheckinModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-xl text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Step Indicator Bar -->
+      <div class="flex gap-2">
+        <div id="step-bar-1" class="h-1.5 flex-1 rounded-full bg-brand-500"></div>
+        <div id="step-bar-2" class="h-1.5 flex-1 rounded-full bg-gray-200"></div>
+        <div id="step-bar-3" class="h-1.5 flex-1 rounded-full bg-gray-200"></div>
+        <div id="step-bar-4" class="h-1.5 flex-1 rounded-full bg-gray-200"></div>
+      </div>
+
+      <!-- STEP 1: PILIH KELAS -->
+      <div id="step-content-1" class="step-pane space-y-3">
+        <p class="text-xs text-gray-500">Pilih jenjang kelasmu untuk Kurikulum Merdeka MTs/SMP:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button type="button" onclick="selectCheckinGrade(7)" class="grade-opt-btn p-4 rounded-2xl border-2 border-brand-100 hover:border-brand-500 hover:bg-brand-50 text-center transition group active:scale-95" data-val="7">
+            <span class="text-3xl block mb-2 group-hover:scale-110 transition">🔵</span>
+            <span class="font-bold text-gray-800 text-sm block">Kelas 7</span>
+            <span class="text-[10px] text-gray-400">Fase D Awal</span>
+          </button>
+          <button type="button" onclick="selectCheckinGrade(8)" class="grade-opt-btn p-4 rounded-2xl border-2 border-brand-500 bg-brand-50 text-center transition group active:scale-95" data-val="8">
+            <span class="text-3xl block mb-2 group-hover:scale-110 transition">🟢</span>
+            <span class="font-bold text-brand-900 text-sm block">Kelas 8</span>
+            <span class="text-[10px] text-brand-600 font-semibold">Fase D Tengah</span>
+          </button>
+          <button type="button" onclick="selectCheckinGrade(9)" class="grade-opt-btn p-4 rounded-2xl border-2 border-brand-100 hover:border-brand-500 hover:bg-brand-50 text-center transition group active:scale-95" data-val="9">
+            <span class="text-3xl block mb-2 group-hover:scale-110 transition">🟣</span>
+            <span class="font-bold text-gray-800 text-sm block">Kelas 9</span>
+            <span class="text-[10px] text-gray-400">Persiapan Kelulusan</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: PILIH MOOD HARI INI -->
+      <div id="step-content-2" class="step-pane hidden space-y-3">
+        <p class="text-xs text-gray-500">Bagaimana perasaan dan energi pikiranmu saat ini?</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button type="button" onclick="selectCheckinMood('semangat', '😊 Semangat', 'Bagus sekali! Kita bisa mencoba materi yang menantang dan kuis seru.')" class="mood-opt-btn p-3.5 rounded-2xl border-2 border-brand-500 bg-brand-50 flex items-center gap-3 text-left transition" data-mood="semangat">
+            <span class="text-2xl">😊</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Semangat</p>
+              <p class="text-[11px] text-gray-500">Penuh energi & siap eksplorasi.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinMood('biasa', '😐 Biasa saja', 'Santai saja, kita mulai perlahan dengan materi yang mudah dipahami.')" class="mood-opt-btn p-3.5 rounded-2xl border-2 border-brand-100 hover:border-brand-400 flex items-center gap-3 text-left transition" data-mood="biasa">
+            <span class="text-2xl">😐</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Biasa saja</p>
+              <p class="text-[11px] text-gray-500">Tenang dan mengalir santai.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinMood('ngantuk', '😴 Mengantuk', 'Tak perlu memaksakan diri. Kita buat rangkuman ringkas & santai ya.')" class="mood-opt-btn p-3.5 rounded-2xl border-2 border-brand-100 hover:border-brand-400 flex items-center gap-3 text-left transition" data-mood="ngantuk">
+            <span class="text-2xl">😴</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Mengantuk</p>
+              <p class="text-[11px] text-gray-500">Materi seringan mungkin.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinMood('pusing', '😵 Pusing', 'Tarik napas dulu. Kita baca contoh-contoh visual tanpa rumus berat.')" class="mood-opt-btn p-3.5 rounded-2xl border-2 border-brand-100 hover:border-brand-400 flex items-center gap-3 text-left transition" data-mood="pusing">
+            <span class="text-2xl">😵</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Pusing</p>
+              <p class="text-[11px] text-gray-500">Contoh simpel tanpa beban.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinMood('kurang_semangat', '😔 Kurang semangat', 'Tidak apa-apa, yang penting ada satu langkah kecil hari ini 🌱')" class="mood-opt-btn p-3.5 rounded-2xl border-2 border-brand-100 hover:border-brand-400 flex items-center gap-3 text-left transition col-span-1 sm:col-span-2" data-mood="kurang_semangat">
+            <span class="text-2xl">😔</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Kurang semangat</p>
+              <p class="text-[11px] text-gray-500">Langkah kecil menyiram pohonmu tanpa paksaan.</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: PILIH CARA BELAJAR -->
+      <div id="step-content-3" class="step-pane hidden space-y-3">
+        <p class="text-xs text-gray-500">Metode apa yang paling nyaman untukmu hari ini?</p>
+        <div class="space-y-2">
+          <button type="button" onclick="selectCheckinStyle('membaca', '📖 Membaca materi')" class="style-opt-btn w-full p-3 rounded-2xl border-2 border-brand-500 bg-brand-50 text-left flex items-center gap-3 transition" data-style="membaca">
+            <span class="text-2xl">📖</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Membaca materi</p>
+              <p class="text-[11px] text-gray-500">Ringkasan esensial poin per poin yang terstruktur.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinStyle('game', '🎮 Belajar sambil bermain')" class="style-opt-btn w-full p-3 rounded-2xl border-2 border-brand-100 hover:border-brand-400 text-left flex items-center gap-3 transition" data-style="game">
+            <span class="text-2xl">🎮</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Belajar sambil bermain</p>
+              <p class="text-[11px] text-gray-500">Interaktif, misi mini, dan simulasi.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinStyle('soal', '📝 Mengerjakan soal')" class="style-opt-btn w-full p-3 rounded-2xl border-2 border-brand-100 hover:border-brand-400 text-left flex items-center gap-3 transition" data-style="soal">
+            <span class="text-2xl">📝</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Mengerjakan soal</p>
+              <p class="text-[11px] text-gray-500">Latihan mandiri dengan pembahasan langsung.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinStyle('kuis', '🧠 Kuis cepat')" class="style-opt-btn w-full p-3 rounded-2xl border-2 border-brand-100 hover:border-brand-400 text-left flex items-center gap-3 transition" data-style="kuis">
+            <span class="text-2xl">🧠</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Kuis cepat</p>
+              <p class="text-[11px] text-gray-500">Uji ingatan konsep kilat 3 menit.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinStyle('contoh', '💡 Memahami materi dengan contoh')" class="style-opt-btn w-full p-3 rounded-2xl border-2 border-brand-100 hover:border-brand-400 text-left flex items-center gap-3 transition" data-style="contoh">
+            <span class="text-2xl">💡</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Memahami materi dengan contoh</p>
+              <p class="text-[11px] text-gray-500">Studi kasus nyata dalam kehidupan sehari-hari.</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4: PILIH MATA PELAJARAN -->
+      <div id="step-content-4" class="step-pane hidden space-y-3">
+        <p class="text-xs text-gray-500">Hari ini mau belajar topik mata pelajaran apa?</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button type="button" onclick="selectCheckinSubject('matematika', 'Matematika', '➗')" class="subj-opt-btn p-3 rounded-2xl border-2 border-brand-100 hover:border-brand-500 flex items-center gap-3 text-left transition" data-sub="matematika">
+            <span class="text-2xl">➗</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Matematika</p>
+              <p class="text-[11px] text-gray-500">Logika bilangan, aljabar & ruang.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinSubject('ipa', 'IPA', '🔬')" class="subj-opt-btn p-3 rounded-2xl border-2 border-brand-500 bg-brand-50 flex items-center gap-3 text-left transition" data-sub="ipa">
+            <span class="text-2xl">🔬</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">IPA</p>
+              <p class="text-[11px] text-gray-500">Sains alam, tubuh & energi.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinSubject('inggris', 'Bahasa Inggris', '🇬🇧')" class="subj-opt-btn p-3 rounded-2xl border-2 border-brand-100 hover:border-brand-500 flex items-center gap-3 text-left transition" data-sub="inggris">
+            <span class="text-2xl">🇬🇧</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Bahasa Inggris</p>
+              <p class="text-[11px] text-gray-500">Reading, texts & vocabulary.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinSubject('indonesia', 'Bahasa Indonesia', '🇮🇩')" class="subj-opt-btn p-3 rounded-2xl border-2 border-brand-100 hover:border-brand-500 flex items-center gap-3 text-left transition" data-sub="indonesia">
+            <span class="text-2xl">🇮🇩</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">Bahasa Indonesia</p>
+              <p class="text-[11px] text-gray-500">Teks deskripsi, ekspresi & sastra.</p>
+            </div>
+          </button>
+          <button type="button" onclick="selectCheckinSubject('ips', 'IPS', '🌏')" class="subj-opt-btn p-3 rounded-2xl border-2 border-brand-100 hover:border-brand-500 flex items-center gap-3 text-left transition col-span-1 sm:col-span-2" data-sub="ips">
+            <span class="text-2xl">🌏</span>
+            <div>
+              <p class="font-bold text-sm text-gray-800">IPS</p>
+              <p class="text-[11px] text-gray-500">Masyarakat, sejarah, geografi & ekonomi.</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Step Controls -->
+      <div class="flex items-center justify-between pt-4 border-t border-brand-100">
+        <button id="btn-step-prev" onclick="prevCheckinStep()" disabled class="px-4 py-2 text-xs font-semibold text-gray-400 hover:text-gray-600 transition">
+          &larr; Kembali
+        </button>
+        <button id="btn-step-next" onclick="nextCheckinStep()" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-soft transition">
+          Lanjut &rarr;
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: MATERI DETAIL VIEW (4 ELEMEN LENGKAP) -->
+  <!-- ======================================================== -->
+  <div id="materi-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-brand-100 max-h-[90vh] overflow-y-auto space-y-6">
+      <div class="flex items-start justify-between border-b border-gray-100 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="modal-materi-badge" class="px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-800 text-[10px] font-bold uppercase">IPA • KELAS 8</span>
+            <span class="text-xs text-gray-400">Kurikulum Merdeka</span>
+          </div>
+          <h3 id="modal-materi-title" class="text-xl font-bold text-gray-900 mt-1">Sistem Pernapasan Manusia</h3>
+        </div>
+        <button onclick="closeMateriModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-xl text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Content sections -->
+      <div class="space-y-6 text-sm">
+        <!-- 1. Ringkasan Materi -->
+        <div class="space-y-2">
+          <h4 class="font-bold text-brand-900 text-sm flex items-center gap-2">
+            <span>📖</span> Ringkasan Materi Esensial
+          </h4>
+          <div id="modal-materi-summary" class="p-4 rounded-2xl bg-brand-50/50 border border-brand-100 text-gray-700 leading-relaxed space-y-2">
+            <!-- Content -->
+          </div>
+        </div>
+
+        <!-- 2. Ilustrasi Visual / Diagram -->
+        <div class="space-y-2">
+          <h4 class="font-bold text-brand-900 text-sm flex items-center gap-2">
+            <span>🖼️</span> Ilustrasi Visual Konsep
+          </h4>
+          <div id="modal-materi-visual" class="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 text-center font-mono text-xs text-brand-900">
+            <!-- Visual diagram -->
+          </div>
+        </div>
+
+        <!-- 3. Contoh Sederhana & Aplikatif -->
+        <div class="space-y-2">
+          <h4 class="font-bold text-brand-900 text-sm flex items-center gap-2">
+            <span>💡</span> Contoh Nyata Sehari-hari
+          </h4>
+          <div id="modal-materi-example" class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-950 text-xs sm:text-sm leading-relaxed">
+            <!-- Example -->
+          </div>
+        </div>
+
+        <!-- 4. Action to 5 Soal Pemahaman -->
+        <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
+          <span class="text-xs text-gray-500">Siap menguji pemahaman?</span>
+          <button id="modal-btn-start-quiz" onclick="startQuizFromModal()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-soft transition flex items-center gap-2">
+            <i class="fa-solid fa-brain"></i> Kerjakan 5 Soal Pemahaman (+EXP)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="app-toast" class="fixed bottom-6 right-6 z-50 bg-white border border-brand-200 px-4 py-3 rounded-2xl shadow-float flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+    <div id="toast-icon" class="text-xl">🌱</div>
+    <div>
+      <p id="toast-title" class="text-xs font-bold text-gray-800">Notifikasi</p>
+      <p id="toast-msg" class="text-[11px] text-gray-500">Pohonmu bertumbuh!</p>
+    </div>
+  </div>
+
+  <script>
+    /* ==============================================================
+       DATABASE MATERI KURIKULUM MERDEKA LENGKAP (KELAS 7, 8, 9)
+       5 Mapel: Matematika, IPA, B. Inggris, B. Indonesia, IPS
+       ============================================================== */
+    const CURRICULUM_DATA = [
+      // KELAS 7
+      {
+        id: 'k7-mtk-1',
+        grade: 7,
+        subject: 'matematika',
+        subjectName: 'Matematika',
+        subjectIcon: '➗',
+        title: 'Bilangan Bulat & Pecahan',
+        estTime: '12 Menit',
+        summary: 'Bilangan bulat mencakup bilangan bulat negatif, nol, dan bilangan positif. Pada garis bilangan, bilangan di sebelah kanan selalu bernilai lebih besar. Operasi perkalian dua bilangan bertanda sama menghasilkan bilangan positif (+), sedangkan bertanda beda menghasilkan negatif (-).',
+        visual: '[ -3 ] ── [ -2 ] ── [ -1 ] ── [ 0 ] ── [ +1 ] ── [ +2 ] ── [ +3 ]\n← Semakin Kecil                      Semakin Besar →',
+        example: 'Suhu di puncak gunung pada malam hari adalah -2°C. Siang hari suhu naik sebesar 8°C. Maka suhunya menjadi: -2 + 8 = 6°C.',
+        bullets: ['Pengurutan bilangan pada garis bilangan.', 'Sifat komutatif, asosiatif, dan distributif.', 'Aplikasi suhu dan perhitungan utang-piutang.'],
+        questions: [
+          {
+            q: "Berapakah hasil dari (-12) + 7 - (-5)?",
+            options: ["0", "-10", "-14", "10"],
+            correct: 0,
+            expl: "(-12) + 7 = -5. Lalu -5 - (-5) = -5 + 5 = 0."
+          },
+          {
+            q: "Hasil dari (-4) × (-6) ÷ 3 adalah...",
+            options: ["-8", "8", "-12", "12"],
+            correct: 1,
+            expl: "(-4) × (-6) = +24. 24 ÷ 3 = 8."
+          },
+          {
+            q: "Pecahan 3/4 senilai dengan persentase...",
+            options: ["50%", "70%", "75%", "80%"],
+            correct: 2,
+            expl: "3/4 × 100% = 75%."
+          },
+          {
+            q: "Suhu awal kulkas -5°C, dimatikan dan suhunya naik 12°C. Berapa suhu sekarang?",
+            options: ["7°C", "-17°C", "17°C", "-7°C"],
+            correct: 0,
+            expl: "-5 + 12 = 7°C."
+          },
+          {
+            q: "Manakah pernyataan yang benar?",
+            options: ["-8 > -3", "-15 > -2", "-4 < 1", "-1 > 0"],
+            correct: 2,
+            expl: "Semua bilangan negatif lebih kecil daripada bilangan positif: -4 < 1."
+          }
+        ]
+      },
+      {
+        id: 'k7-ipa-1',
+        grade: 7,
+        subject: 'ipa',
+        subjectName: 'IPA',
+        subjectIcon: '🔬',
+        title: 'Hakikat Sains & Metode Ilmiah',
+        estTime: '10 Menit',
+        summary: 'Sains adalah ilmu pengetahuan sistematis tentang alam semesta berdasarkan pengamatan dan eksperimen. Metode ilmiah melibatkan 5 langkah: Merumuskan masalah, hipotesis, eksperimen, analisis data, dan kesimpulan.',
+        visual: '💡 Masalah ➔ ❓ Hipotesis ➔ 🧪 Eksperimen ➔ 📊 Analisis ➔ 🎯 Kesimpulan',
+        example: 'Kamu ingin tahu apakah tanaman cabai tumbuh lebih cepat jika disiram air cucian beras. Kamu melakukan percobaan dengan dua pot selama 7 hari.',
+        bullets: ['Pengenalan alat-alat laboratorium & simbol keselamatan.', 'Variabel bebas, terikat, dan kontrol.', 'Pengukuran besaran pokok dan turunan.'],
+        questions: [
+          {
+            q: "Langkah pertama dalam melakukan penyelidikan ilmiah adalah...",
+            options: ["Menarik kesimpulan", "Melakukan eksperimen", "Merumuskan masalah/pertanyaan", "Menulis laporan"],
+            correct: 2,
+            expl: "Penyelidikan ilmiah selalu bermula dari rasa ingin tahu yang dirumuskan dalam masalah."
+          },
+          {
+            q: "Dugaan sementara yang masih harus diuji kebenarannya disebut...",
+            options: ["Teori", "Hipotesis", "Hukum alam", "Variabel"],
+            correct: 1,
+            expl: "Hipotesis adalah jawaban sementara yang diuji lewat eksperimen."
+          },
+          {
+            q: "Satuan Internasional (SI) untuk besaran suhu adalah...",
+            options: ["Celcius", "Fahrenheit", "Kelvin", "Reamur"],
+            correct: 2,
+            expl: "Satuan SI resmi untuk suhu adalah Kelvin (K)."
+          },
+          {
+            q: "Alat laboratorium yang berfungsi mengukur volume zat cair secara presisi adalah...",
+            options: ["Tabung reaksi", "Gelas ukur", "Cawan petri", "Kaki tiga"],
+            correct: 1,
+            expl: "Gelas ukur digunakan untuk mengukur volume cairan secara akurat."
+          },
+          {
+            q: "Simbol tengkorak pada botol bahan kimia di laboratorium menandakan bahwa zat tersebut...",
+            options: ["Mudah terbakar", "Beracun (Toksik)", "Korosif", "Radioaktif"],
+            correct: 1,
+            expl: "Simbol tengkorak dan tulang bersilang menunjukkan sifat racun berbahaya."
+          }
+        ]
+      },
+      {
+        id: 'k7-inggris-1',
+        grade: 7,
+        subject: 'inggris',
+        subjectName: 'Bahasa Inggris',
+        subjectIcon: '🇬🇧',
+        title: 'Describing People & Things (Descriptive Text)',
+        estTime: '10 Menit',
+        summary: 'Descriptive text aims to describe a specific person, place, or thing. Structure includes: Identification (introducing who/what) and Description (physical appearance, traits, characteristics). Uses Simple Present Tense and Adjectives.',
+        visual: '[ Identification: Meet my cat, Milo ]\n        ↓\n[ Description: Milo has soft white fur, green eyes, and loves fish ]',
+        example: '"My classroom is big and clean. There are twenty desks and a whiteboard on the wall."',
+        bullets: ['Simple Present Tense with to be (is, am, are).', 'Adjectives order (size, color, quality).', 'Writing short description profiles.'],
+        questions: [
+          {
+            q: "What is the primary purpose of a descriptive text?",
+            options: ["To tell a past story", "To describe a particular person, place, or thing", "To instruct how to make food", "To persuade the reader"],
+            correct: 1,
+            expl: "Descriptive text describes the features and details of a specific subject."
+          },
+          {
+            q: "She ... very kind and helpful to her classmates.",
+            options: ["are", "am", "is", "be"],
+            correct: 2,
+            expl: "Subject 'She' takes the verb to be 'is'."
+          },
+          {
+            q: "Which word is an adjective of personality?",
+            options: ["Friendly", "Quickly", "School", "Run"],
+            correct: 0,
+            expl: "'Friendly' is an adjective describing personal attitude."
+          },
+          {
+            q: "The correct sentence with adjectives is...",
+            options: ["She has a hair long black.", "She has long black hair.", "She has black hair long.", "She long hair black has."],
+            correct: 1,
+            expl: "Normal adjective order puts size/length (long) before color (black): 'long black hair'."
+          },
+          {
+            q: "What part of descriptive text introduces the object to be described?",
+            options: ["Resolution", "Orientation", "Identification", "Reorientation"],
+            correct: 2,
+            expl: "Identification introduces the person or object being described."
+          }
+        ]
+      },
+      {
+        id: 'k7-indonesia-1',
+        grade: 7,
+        subject: 'indonesia',
+        subjectName: 'Bahasa Indonesia',
+        subjectIcon: '🇮🇩',
+        title: 'Menjelajah Keindahan Teks Deskripsi',
+        estTime: '10 Menit',
+        summary: 'Teks deskripsi menggambarkan objek atau peristiwa dengan merangsang panca indra (penglihatan, pendengaran, penciuman, perabaan) sehingga pembaca seolah melihat atau merasakan langsung objek tersebut.',
+        visual: '👀 Visual  |  👂 Bunyi  |  👃 Aroma  ➔ Ditulis secara hidup & detail',
+        example: '"Pasir Pantai Kuta terasa hangat dan lembut menyentuh telapak kaki. Deburan ombak putih bergulung teratur diiringi semilir angin laut."',
+        bullets: ['Ciri umum teks deskripsi berdasar panca indra.', 'Struktur: Judul, Identifikasi, Deskripsi Bagian, Simpulan.', 'Penggunaan kata konkret dan kalimat bermajas.'],
+        questions: [
+          {
+            q: "Ciri utama teks deskripsi adalah...",
+            options: ["Memuat langkah-langkah membuat sesuatu", "Menggambarkan objek sejelas-jelasnya melibatkan panca indra", "Menjelaskan sebab akibat fenomena alam", "Menceritakan tokoh fiktif masa lalu"],
+            correct: 1,
+            expl: "Teks deskripsi berfokus melukiskan rincian objek melalui pancaindra."
+          },
+          {
+            q: "'Angin sore membelai lembut dedaunan kelapa.' Kalimat tersebut menggunakan majas...",
+            options: ["Hiperbola", "Metafora", "Personifikasi", "Litotes"],
+            correct: 2,
+            expl: "Personifikasi mengumpamakan benda mati (angin) bersikap seperti manusia (membelai lembut)."
+          },
+          {
+            q: "Bagian teks deskripsi yang berisi pengenalan nama objek dan lokasi disebut...",
+            options: ["Deskripsi bagian", "Identifikasi", "Penutup", "Koda"],
+            correct: 1,
+            expl: "Identifikasi memuat gambaran umum/pengenalan awal objek."
+          },
+          {
+            q: "Kalimat yang melibatkan indra pendengaran adalah...",
+            options: ["Bunga mawar itu merah merekah.", "Suara gemericik air sungai menenangkan jiwa.", "Kue bolu ini sangat lembut di lidah.", "Udara pagi begitu dingin menusuk tulang."],
+            correct: 1,
+            expl: "'Gemericik air' melibatkan alat indra pendengaran (telinga)."
+          },
+          {
+            q: "Kata konkret untuk memperjelas kata 'indah' pada pemandangan adalah...",
+            options: ["Bagus sekali", "Hijau royo-royo berkilau diterpa embun", "Sangat lumayan", "Luar biasa"],
+            correct: 1,
+            expl: "Pilihan tersebut menyajikan deskripsi visual konkret yang dapat dibayangkan."
+          }
+        ]
+      },
+      {
+        id: 'k7-ips-1',
+        grade: 7,
+        subject: 'ips',
+        subjectName: 'IPS',
+        subjectIcon: '🌏',
+        title: 'Keluarga Awal Kehidupan & Kondisi Geografis',
+        estTime: '12 Menit',
+        summary: 'Keluarga merupakan agen sosialisasi primer pertama bagi seorang individu. Sementara letak astronomis Indonesia (6°LU-11°LS dan 95°BT-141°BT) menyebabkan Indonesia beriklim tropis dengan dua musim: kemarau dan hujan.',
+        visual: '👨‍👩‍👧 Keluarga: Sosialisasi Nilai & Karakter\n📍 Letak Astronomis: Iklim Tropis + 3 Zona Waktu (WIB, WITA, WIT)',
+        example: 'Perbedaan waktu antara Jakarta (WIB) dan Bali (WITA) berjarak 1 jam. Saat jam 07.00 di Jakarta, di Denpasar sudah pukul 08.00.',
+        bullets: ['Peran norma dan sosialisasi dalam keluarga.', 'Letak astronomis dan geografis Indonesia.', 'Pembagian 3 zona waktu di Indonesia.'],
+        questions: [
+          {
+            q: "Lembaga sosial pertama dan paling mendasar dalam membentuk kepribadian anak adalah...",
+            options: ["Sekolah", "Keluarga", "Teman bermain", "Media massa"],
+            correct: 1,
+            expl: "Keluarga adalah agen sosialisasi primer terawal dalam kehidupan seseorang."
+          },
+          {
+            q: "Letak astronomis Indonesia berada pada koordinat...",
+            options: ["6°LU - 11°LS dan 95°BT - 141°BT", "10°LU - 15°LS dan 90°BT - 130°BT", "0°LU - 10°LS dan 100°BT - 120°BT", "5°LU - 15°LS dan 95°BT - 145°BT"],
+            correct: 0,
+            expl: "Koordinat astronomis Indonesia adalah 6°LU-11°LS dan 95°BT-141°BT."
+          },
+          {
+            q: "Daerah berikut yang termasuk dalam Zona Waktu Indonesia Tengah (WITA) adalah...",
+            options: ["Jawa Barat", "Sumatera Utara", "Bali dan Sulawesi", "Papua Barat"],
+            correct: 2,
+            expl: "Bali, NTB, NTT, Kalimantan Selatan/Timur/Utara, dan Sulawesi masuk WITA."
+          },
+          {
+            q: "Karena terletak di garis khatulistiwa, Indonesia memiliki iklim...",
+            options: ["Subtropis", "Kering/Gurun", "Tropis", "Kutub"],
+            correct: 2,
+            expl: "Letak ekuator memberikan iklim tropis dengan curah hujan dan sinar matahari melimpah."
+          },
+          {
+            q: "Cerita rakyat dan silsilah keluarga yang diwariskan lisan disebut tradisi...",
+            options: ["Tertulis", "Lisan", "Primer", "Artefak"],
+            correct: 1,
+            expl: "Tradisi lisan diwariskan turun temurun lewat tutur kata."
+          }
+        ]
+      },
+
+      // KELAS 8 (TOPIC UTAMA DARI CONTOH USER)
+      {
+        id: 'k8-ipa-1',
+        grade: 8,
+        subject: 'ipa',
+        subjectName: 'IPA',
+        subjectIcon: '🔬',
+        title: 'Sistem Pernapasan Manusia',
+        estTime: '10 Menit',
+        summary: 'Sistem pernapasan bertugas menukar Oksigen (O₂) dari udara dengan Karbon Dioksida (CO₂) sisa metabolisme. Udara masuk melalui hidung (disaring & dihangatkan), faring, laring, trakea, bronkus, bronkiolus, hingga alveolus tempat difusi kapiler darah terjadi.',
+        visual: 'Hidung ➔ Faring ➔ Laring ➔ Trakea ➔ Bronkus ➔ Alveolus [Difusi O₂ ↔ CO₂]',
+        example: 'Saat kamu berlari cepat, tubuh memerlukan lebih banyak energi, sehingga frekuensi pernapasan otomatis meningkat agar suplai O₂ ke sel-sel otot tercukupi.',
+        bullets: ['Urutan jalurnya udara pernapasan.', 'Mekanisme pernapasan dada vs pernapasan perut (diafragma).', 'Penyakit pernapasan: Asma, TBC, dan Bronkitis.'],
+        questions: [
+          {
+            q: "Tempat terjadinya pertukaran gas O₂ dan CO₂ secara difusi pada paru-paru adalah...",
+            options: ["Bronkus", "Alveolus", "Trakea", "Laring"],
+            correct: 1,
+            expl: "Alveolus adalah kantung udara sangat tipis yang dikelilingi kapiler pembuluh darah."
+          },
+          {
+            q: "Fungsi rambut getar (silia) dan lendir di dalam hidung dan trakea adalah...",
+            options: ["Memproduksi suara nyaring", "Menyaring debu dan kotoran dari udara", "Mendinginkan udara masuk", "Mempercepat pertukaran gas"],
+            correct: 1,
+            expl: "Silia dan lendir menyaring partikel asing sebelum udara masuk ke organ dalam."
+          },
+          {
+            q: "Pada pernapasan perut, saat otot diafragma berkontraksi (mendatar), maka yang terjadi adalah...",
+            options: ["Rongga dada mengecil, udara keluar (ekspirasi)", "Rongga dada membesar, udara masuk (inspirasi)", "Paru-paru mengecil seketika", "Tekanan udara paru-paru meningkat"],
+            correct: 1,
+            expl: "Diafragma mendatar memperbesar volume rongga dada sehingga udara luar terhisap masuk."
+          },
+          {
+            q: "Katup yang mencegah makanan masuk ke saluran pernapasan saat menelan adalah...",
+            options: ["Epiglotis", "Uvula", "Alveoli", "Pita suara"],
+            correct: 0,
+            expl: "Epiglotis otomatis menutup saluran pernapasan saat kita menelan makanan."
+          },
+          {
+            q: "Penyakit penyempitan saluran napas akibat alergi atau debu dinamakan...",
+            options: ["TBC", "Asma", "Anemia", "Pneumonia"],
+            correct: 1,
+            expl: "Asma ditandai dengan sesak napas akibat penyempitan bronkiolus oleh pemicu alergen."
+          }
+        ]
+      },
+      {
+        id: 'k8-mtk-1',
+        grade: 8,
+        subject: 'matematika',
+        subjectName: 'Matematika',
+        subjectIcon: '➗',
+        title: 'Teorema Pythagoras & Segitiga',
+        estTime: '15 Menit',
+        summary: 'Teorema Pythagoras menyatakan bahwa pada segitiga siku-siku, kuadrat panjang sisi miring (hipotenusa) sama dengan jumlah kuadrat panjang kedua sisi siku-sikunya. Rumus utama: c² = a² + b².',
+        visual: '       |\ \n     a |  \ c (hipotenusa)   ===>  c² = a² + b²\n       |___\ \n         b',
+        example: 'Sebuah tangga panjang 5 meter disandarkan di dinding. Jarak kaki tangga ke dinding 3 meter. Tinggi dinding yang dicapai tangga adalah √(5² - 3²) = √(25 - 9) = √16 = 4 meter.',
+        bullets: ['Membuktikan rumus c² = a² + b².', 'Mengenal tripel Pythagoras (3,4,5; 5,12,13; 7,24,25).', 'Menentukan jenis segitiga (lancip, siku-siku, tumpul).'],
+        questions: [
+          {
+            q: "Sebuah segitiga siku-siku memiliki sisi tegak 6 cm dan 8 cm. Berapa panjang sisi miringnya?",
+            options: ["10 cm", "12 cm", "14 cm", "9 cm"],
+            correct: 0,
+            expl: "c = √(6² + 8²) = √(36 + 64) = √100 = 10 cm."
+          },
+          {
+            q: "Manakah kelompok bilangan di bawah ini yang merupakan Tripel Pythagoras?",
+            options: ["4, 5, 6", "5, 12, 13", "7, 10, 12", "6, 8, 12"],
+            correct: 1,
+            expl: "5² + 12² = 25 + 144 = 169 = 13²."
+          },
+          {
+            q: "Jika c² > a² + b² pada sebuah segitiga dengan c sisi terpanjang, maka segitiga tersebut adalah...",
+            options: ["Segitiga Siku-siku", "Segitiga Lancip", "Segitiga Tumpul", "Segitiga Sama Sisi"],
+            correct: 2,
+            expl: "Jika kuadrat sisi terpanjang lebih besar dari jumlah kuadrat lainnya, segitiganya tumpul."
+          },
+          {
+            q: "Sisi miring sebuah segitiga adalah 25 cm, sisi alas 24 cm. Tinggi segitiga adalah...",
+            options: ["7 cm", "10 cm", "12 cm", "15 cm"],
+            correct: 0,
+            expl: "t = √(25² - 24²) = √(625 - 576) = √49 = 7 cm."
+          },
+          {
+            q: "Sebuah kapal berlayar 12 km ke arah utara, lalu berbelok 9 km ke arah timur. Jarak terdekat kapal dari posisi awal adalah...",
+            options: ["15 km", "21 km", "18 km", "16 km"],
+            correct: 0,
+            expl: "Jarak = √(12² + 9²) = √(144 + 81) = √225 = 15 km."
+          }
+        ]
+      },
+      {
+        id: 'k8-inggris-1',
+        grade: 8,
+        subject: 'inggris',
+        subjectName: 'Bahasa Inggris',
+        subjectIcon: '🇬🇧',
+        title: 'Recount Text (My Unforgettable Experience)',
+        estTime: '12 Menit',
+        summary: 'Recount text retells events or experiences that happened in the past in chronological order. Generic Structure: Orientation (setting the scene), Events (series of events), and Reorientation (personal comment). Uses Simple Past Tense (V2).',
+        visual: '[ Orientation: Who, When, Where ] ➔ [ Events: First, Next, Finally ] ➔ [ Reorientation: Reflection ]',
+        example: '"Last Sunday, my family and I went to the beach. We built sandcastles and ate fresh coconuts. It was a tiring but memorable day."',
+        bullets: ['Using Past Tense verbs (went, bought, studied, felt).', 'Time connectors: yesterday, after that, then, finally.', 'Constructing personal dairy and travel entries.'],
+        questions: [
+          {
+            q: "Which tense is predominantly used in a Recount Text?",
+            options: ["Simple Present Tense", "Simple Past Tense", "Future Tense", "Present Continuous"],
+            correct: 1,
+            expl: "Recount text talks about completed events in the past, thus using Simple Past Tense."
+          },
+          {
+            q: "What is the past form (V2) of the verb 'buy'?",
+            options: ["Buyed", "Bought", "Buying", "Buys"],
+            correct: 1,
+            expl: "The irregular past form of 'buy' is 'bought'."
+          },
+          {
+            q: "'Last holiday, we visited Borobudur Temple.' In recount text, this sentence belongs to...",
+            options: ["Reorientation", "Orientation", "Complication", "Resolution"],
+            correct: 1,
+            expl: "Orientation introduces the setting of time, place, and participants."
+          },
+          {
+            q: "Choose the correct sentence in Simple Past Tense:",
+            options: ["She write a letter yesterday.", "She wrote a letter yesterday.", "She is writing a letter yesterday.", "She writes a letter yesterday."],
+            correct: 1,
+            expl: "'Wrote' is the correct past tense for write with past time signal 'yesterday'."
+          },
+          {
+            q: "Which time conjunction shows chronological sequence in events?",
+            options: ["Because", "Although", "After that", "Unless"],
+            correct: 2,
+            expl: "'After that' sequences one action after another."
+          }
+        ]
+      },
+      {
+        id: 'k8-indonesia-1',
+        grade: 8,
+        subject: 'indonesia',
+        subjectName: 'Bahasa Indonesia',
+        subjectIcon: '🇮🇩',
+        title: 'Teks Eksplanasi Ilmiah & Fenomena Alam',
+        estTime: '12 Menit',
+        summary: 'Teks eksplanasi menjelaskan proses "mengapa" dan "bagaimana" terjadinya fenomena alam, sosial, ilmu pengetahuan, atau budaya. Menggunakan konjungsi kausalitas (sebab-akibat) dan kronologis.',
+        visual: 'Identifikasi Fenomena ➔ Proses Sebab-Akibat (Kausalitas) ➔ Ulasan / Simpulan',
+        example: '"Hujan terjadi karena air laut mengalami penguapan (evaporasi) oleh panas matahari, membentuk awan (kondensasi), hingga jatuh sebagai presipitasi."',
+        bullets: ['Struktur: Pernyataan umum, Rangkaian kejadian, Interpretasi.', 'Konjungsi sebab-akibat: karena, sebab, sehingga, akibatnya.', 'Membedakan fakta objektif dengan opini penulis.'],
+        questions: [
+          {
+            q: "Inti bahasan dalam teks eksplanasi adalah...",
+            options: ["Langkah membuat kerajinan", "Proses terjadinya suatu fenomena secara kausalitas", "Kisah fantasi seorang pahlawan", "Bujukan membeli produk"],
+            correct: 1,
+            expl: "Eksplanasi berfokus pada hubungan sebab-akibat timbulnya fenomena."
+          },
+          {
+            q: "Konjungsi yang menyatakan hubungan sebab-akibat adalah...",
+            options: ["Kemudian dan lalu", "Oleh karena itu dan sehingga", "Atau dan jika", "Meskipun dan walaupun"],
+            correct: 1,
+            expl: "'Oleh karena itu' dan 'sehingga' menghubungkan penyebab dengan akibatnya."
+          },
+          {
+            q: "Bagian akhir dari teks eksplanasi yang berisi intisari atau tanggapan disebut...",
+            options: ["Pernyataan umum", "Deretan penjelas", "Interpretasi / Ulasan", "Abstraksi"],
+            correct: 2,
+            expl: "Interpretasi adalah bagian simpulan akhir dari pemaparan fenomena."
+          },
+          {
+            q: "Fenomena berikut yang cocok diangkat menjadi teks eksplanasi ilmiah adalah...",
+            options: ["Tips memenangkan lomba lari", "Proses terjadinya pelangi setelah hujan", "Cerita si Kancil dan Buaya", "Resep membuat nasi goreng"],
+            correct: 1,
+            expl: "Pelangi adalah fenomena optik alam yang dapat dijelaskan secara ilmiah."
+          },
+          {
+            q: "Ciri kebahasaan yang menonjol pada teks eksplanasi adalah penggunaan kata kerja...",
+            options: ["Imperatif (perintah)", "Material dan relasional", "Konotatif puitis", "Emotif kemarahan"],
+            correct: 1,
+            expl: "Teks eksplanasi banyak memakai verba material dan relasional (menyebabkan, menghasilkan)."
+          }
+        ]
+      },
+      {
+        id: 'k8-ips-1',
+        grade: 8,
+        subject: 'ips',
+        subjectName: 'IPS',
+        subjectIcon: '🌏',
+        title: 'Keragaman Budaya & Aktivitas Ekonomi',
+        estTime: '10 Menit',
+        summary: 'Keanekaragaman budaya bangsa Indonesia dipengaruhi oleh letak geografis kepulauan dan jalur perdagangan maritim dunia. Aktivitas ekonomi masyarakat terbagi menjadi produksi, distribusi, dan konsumsi.',
+        visual: '🏭 Produksi (Membuat) ➔ 🚚 Distribusi (Menyalurkan) ➔ 🛒 Konsumsi (Memakai)',
+        example: 'Petani menanam padi di sawah (Produksi), beras diangkut truk ke pasar kota (Distribusi), dan keluarga memasak nasi untuk makan siang (Konsumsi).',
+        bullets: ['Faktor pembentuk keragaman suku & budaya di Nusantara.', 'Peran pelaku ekonomi: RTK, RTP, Pemerintah, Luar Negeri.', 'Pemanfaatan sumber daya kelautan secara berkelanjutan.'],
+        questions: [
+          {
+            q: "Kegiatan menyalurkan barang dari produsen ke tangan konsumen disebut...",
+            options: ["Produksi", "Konsumsi", "Distribusi", "Investasi"],
+            correct: 2,
+            expl: "Distribusi bertugas menyampaikan hasil produksi ke pembeli."
+          },
+          {
+            q: "Faktor geografis utama yang menyebabkan keragaman suku bangsa di Indonesia adalah...",
+            options: ["Bentuk wilayah kepulauan", "Banyaknya gedung bertingkat", "Iklim dingin pegunungan", "Sedikitnya sungai"],
+            correct: 0,
+            expl: "Isolasi alami antar pulau menciptakan variasi adat, bahasa, dan kebiasaan yang unik."
+          },
+          {
+            q: "Pihak yang berperan sebagai penyedia faktor produksi (tanah, tenaga kerja, modal) adalah...",
+            options: ["Rumah Tangga Konsumen (RTK)", "Rumah Tangga Produsen (RTP)", "Pemerintah", "Eksportir"],
+            correct: 0,
+            expl: "RTK menyediakan tenaga kerja dan tanah untuk digunakan produsen."
+          },
+          {
+            q: "Sikap yang tepat dalam menghadapi keragaman budaya sesuai semboyan Bhinneka Tunggal Ika adalah...",
+            options: ["Menganggap budaya sendiri paling hebat", "Toleransi dan saling menghargai", "Menghindari pergaulan lintas suku", "Menolak mempelajari budaya daerah lain"],
+            correct: 1,
+            expl: "Toleransi adalah kunci persatuan di tengah keberagaman suku bangsa."
+          },
+          {
+            q: "Contoh kegiatan konsumsi dalam kehidupan siswa sehari-hari adalah...",
+            options: ["Membeli pensil di koperasi untuk menulis", "Menjual kue buatan ibu di sekolah", "Membuat kerajinan tangan dari bambu", "Mengantar barang pesanan teman"],
+            correct: 0,
+            expl: "Membeli pensil untuk langsung dipakai menulis adalah kegiatan konsumsi."
+          }
+        ]
+      },
+
+      // KELAS 9
+      {
+        id: 'k9-mtk-1',
+        grade: 9,
+        subject: 'matematika',
+        subjectName: 'Matematika',
+        subjectIcon: '➗',
+        title: 'Persamaan & Fungsi Kuadrat',
+        estTime: '15 Menit',
+        summary: 'Bentuk umum persamaan kuadrat adalah ax² + bx + c = 0 dengan a ≠ 0. Nilai x (akar-akar persamaan) dapat dicari dengan memfaktorkan, melengkapkan kuadrat sempurna, atau menggunakan rumus kuadratis abc: x = (-b ± √(b² - 4ac)) / 2a.',
+        visual: 'ax² + bx + c = 0  ➔  Diskriminan (D) = b² - 4ac\nKurva parabola tersenyum jika a > 0, cemberut jika a < 0',
+        example: 'Tinggi roket air setelah t detik dirumuskan h(t) = 20t - 5t². Waktu untuk mencapai tinggi maksimum adalah t = -b / (2a) = -20 / (2 × -5) = 2 detik.',
+        bullets: ['Menentukan akar lewat pemfaktoran.', 'Menghitung nilai Diskriminan (D).', 'Karakteristik kurva parabola fungsi kuadrat.'],
+        questions: [
+          {
+            q: "Akar-akar dari persamaan kuadrat x² - 5x + 6 = 0 adalah...",
+            options: ["x = 2 atau x = 3", "x = -2 atau x = -3", "x = 1 atau x = 6", "x = -1 atau x = -6"],
+            correct: 0,
+            expl: "(x - 2)(x - 3) = 0, sehingga x = 2 atau x = 3."
+          },
+          {
+            q: "Berapa nilai diskriminan dari persamaan x² + 4x + 4 = 0?",
+            options: ["0", "4", "16", "-8"],
+            correct: 0,
+            expl: "D = b² - 4ac = 4² - 4(1)(4) = 16 - 16 = 0."
+          },
+          {
+            q: "Jika nilai D = 0, maka grafik fungsi kuadrat akan...",
+            options: ["Memotong sumbu X di dua titik", "Menyinggung sumbu X di satu titik", "Tidak menyentuh sumbu X sama sekali", "Berbentuk garis lurus"],
+            correct: 1,
+            expl: "D = 0 menandakan memiliki 2 akar kembar (menyinggung di satu titik)."
+          },
+          {
+            q: "Sumbu simetri dari grafik fungsi f(x) = x² - 6x + 8 adalah...",
+            options: ["x = 3", "x = -3", "x = 6", "x = 4"],
+            correct: 0,
+            expl: "x = -b / (2a) = -(-6) / (2 × 1) = 6 / 2 = 3."
+          },
+          {
+            q: "Arah keterbukaan grafik f(x) = -2x² + 4x + 1 adalah...",
+            options: ["Terbuka ke atas", "Terbuka ke bawah", "Mendatar", "Melingkar"],
+            correct: 1,
+            expl: "Karena koefisien a = -2 (negatif), maka parabola terbuka ke bawah."
+          }
+        ]
+      },
+      {
+        id: 'k9-ipa-1',
+        grade: 9,
+        subject: 'ipa',
+        subjectName: 'IPA',
+        subjectIcon: '🔬',
+        title: 'Listrik Statis & Dinamis dalam Kehidupan',
+        estTime: '15 Menit',
+        summary: 'Listrik timbul karena adanya muatan listrik (proton positif dan elektron negatif). Hukum Coulomb menyatakan bahwa gaya tarik atau tolak antara dua muatan sebanding dengan perkalian kedua muatan dan berbanding terbalik dengan kuadrat jaraknya. Pada listrik dinamis, arus listrik I = V / R (Hukum Ohm).',
+        visual: 'Hukum Coulomb: F = k × (q₁ × q₂) / r²\nHukum Ohm: V = I × R (Tegangan = Arus × Hambatan)',
+        example: 'Penggaris plastik yang digosokkan ke rambut kering akan bermuatan negatif karena menerima elektron, sehingga mampu menarik sobekan kertas kecil.',
+        bullets: ['Gaya Coulomb antar muatan listrik.', 'Rangkaian seri dan paralel resistor.', 'Pemanfaatan listrik pada sistem saraf dan hewan penghasil listrik.'],
+        questions: [
+          {
+            q: "Dua muatan sejenis (sama-sama positif) bila didekatkan akan...",
+            options: ["Tarik-menarik", "Tolak-menolak", "Diam tidak berinteraksi", "Menghasilkan magnet"],
+            correct: 1,
+            expl: "Muatan sejenis tolak-menolak, muatan berbeda jenis tarik-menarik."
+          },
+          {
+            q: "Sebuah hambatan 10 Ohm dihubungkan dengan sumber tegangan 20 Volt. Berapa arus listrik yang mengalir?",
+            options: ["0.5 A", "2 A", "200 A", "10 A"],
+            correct: 1,
+            expl: "I = V / R = 20 / 10 = 2 Ampere."
+          },
+          {
+            q: "Kelebihan rangkaian paralel yang digunakan pada instalasi listrik rumah adalah...",
+            options: ["Jika satu lampu mati, lampu lain tetap menyala", "Kabel yang dibutuhkan sangat sedikit", "Arus di semua cabang selalu sama persis", "Tegangannya terbagi rata"],
+            correct: 0,
+            expl: "Rangkaian paralel memiliki cabang mandiri sehingga tidak memadamkan lampu lainnya."
+          },
+          {
+            q: "Partikel atom yang dapat berpindah saat benda digosok adalah...",
+            options: ["Proton", "Neutron", "Elektron", "Nukleus"],
+            correct: 2,
+            expl: "Elektron berada di kulit atom terluar sehingga mudah berpindah."
+          },
+          {
+            q: "Hewan yang memiliki organ khusus elektrosit untuk menghasilkan kejutan listrik berdaya tinggi adalah...",
+            options: ["Belut listrik", "Lumba-lumba", "Gajah", "Burung merpati"],
+            correct: 0,
+            expl: "Belut listrik dapat menghasilkan tegangan ratusan volt untuk melumpuhkan mangsa."
+          }
+        ]
+      },
+      {
+        id: 'k9-inggris-1',
+        grade: 9,
+        subject: 'inggris',
+        subjectName: 'Bahasa Inggris',
+        subjectIcon: '🇬🇧',
+        title: 'Narrative Text & Traditional Folktales',
+        estTime: '12 Menit',
+        summary: 'Narrative text entertains readers with imaginative or folktale stories. Generic Structure: Orientation (introduction of characters and setting), Complication (conflict begins and peaks), Resolution (problems resolved), and Moral Value (coda).',
+        visual: 'Orientation ➔ Complication (Climax ⚡) ➔ Resolution ➔ Moral Lesson',
+        example: 'In the legend of Malin Kundang, Malin denied his poor mother after becoming rich, and was cursed into a stone. Lesson: Always respect your parents.',
+        bullets: ['Direct vs Indirect Speech in narrative dialogue.', 'Adverbs of time: Once upon a time, Long ago, One day.', 'Identifying moral values and character traits.'],
+        questions: [
+          {
+            q: "What is the climax in a narrative story?",
+            options: ["The introduction of the setting", "The peak of the main problem/conflict", "The happy ending", "The description of items"],
+            correct: 1,
+            expl: "The climax in the complication is the highest and most thrilling point of tension."
+          },
+          {
+            q: "'Once upon a time, there lived a kind girl named Cinderella.' This part is the...",
+            options: ["Resolution", "Orientation", "Reorientation", "Evaluation"],
+            correct: 1,
+            expl: "It introduces time, character, and background setting (Orientation)."
+          },
+          {
+            q: "The main purpose of a narrative text is to...",
+            options: ["Amuse or entertain the readers with a story", "Report factual scientific data", "Persuade people to vote", "Give instructions step by step"],
+            correct: 0,
+            expl: "Narrative stories aim to entertain while offering moral lessons."
+          },
+          {
+            q: "Which word often signals a past folktale beginning?",
+            options: ["Tomorrow morning", "Right now", "Once upon a time", "In the next century"],
+            correct: 2,
+            expl: "'Once upon a time' is a classic opening for fables and legends."
+          },
+          {
+            q: "The lesson that readers take away from a narrative story is called...",
+            options: ["Plot twist", "Moral value / Coda", "Setting", "Complication"],
+            correct: 1,
+            expl: "Moral value is the wisdom or positive message taught by the tale."
+          }
+        ]
+      },
+      {
+        id: 'k9-indonesia-1',
+        grade: 9,
+        subject: 'indonesia',
+        subjectName: 'Bahasa Indonesia',
+        subjectIcon: '🇮🇩',
+        title: 'Menyampaikan Gagasan Lewat Pidato Persuasif',
+        estTime: '12 Menit',
+        summary: 'Pidato persuasif bertujuan meyakinkan pendengar untuk melakukan atau menyetujui suatu tindakan atau pandangan. Menggunakan etika, emosi, dan logika secara seimbang.',
+        visual: 'Etika (Kredibilitas) + Emosi (Sentuhan Hati) + Logika (Fakta Data) ➔ Meyakinkan Audiens',
+        example: '"Marilah kita kurangi penggunaan plastik sekali pakai di kantin sekolah kita mulai hari ini, demi menjaga laut dan bumi yang kita cintai!"',
+        bullets: ['Struktur: Pembukaan, Isi Pidato, Penutup.', 'Kalimat persuasif, ajakan, dan kata emotif.', 'Penggunaan kata tugas dan sinonim untuk keindahan pidato.'],
+        questions: [
+          {
+            q: "Tujuan utama dari pidato persuasif adalah...",
+            options: ["Menghibur penonton dengan lelucon", "Mengajak atau meyakinkan pendengar agar sepakat dan bertindak", "Menceritakan masa kecil pembicara", "Menjelaskan cara memasak makanan"],
+            correct: 1,
+            expl: "Pidato persuasif berusaha memengaruhi keyakinan dan sikap audiens."
+          },
+          {
+            q: "Kata berikut yang termasuk kata ajakan persuasif adalah...",
+            options: ["Mungkin", "Marilah dan ayo", "Kemarin", "Kapan"],
+            correct: 1,
+            expl: "'Marilah' dan 'ayo' adalah contoh kata ajakan langsung."
+          },
+          {
+            q: "Bagian pembukaan pidato persuasif yang santun umumnya berisi...",
+            options: ["Salam pembuka, ucapan syukur, dan penghormatan kepada hadirin", "Daftar belanja pembicara", "Argumen keras tanpa salam", "Kesimpulan langsung"],
+            correct: 0,
+            expl: "Etika pidato diawali salam, rasa syukur, dan sapaan hormat."
+          },
+          {
+            q: "Pendekatan persuasif yang menggunakan data fakta dan angka ilmiah disebut pendekatan...",
+            options: ["Emosi", "Logika (Nalar)", "Etika", "Mitos"],
+            correct: 1,
+            expl: "Logika mengandalkan fakta objektif dan data yang dapat dibuktikan."
+          },
+          {
+            q: "Kalimat penutup pidato persuasif yang baik adalah...",
+            options: ["Sekian dan tidak usah banyak tanya.", "Demikian yang dapat saya sampaikan, mohon maaf atas kekhilafan dan terima kasih.", "Saya rasa pidato saya paling hebat hari ini.", "Cukup sudah sampai sini saja."],
+            correct: 1,
+            expl: "Penutup yang baik memuat ringkasan santun, permohonan maaf, dan terima kasih."
+          }
+        ]
+      },
+      {
+        id: 'k9-ips-1',
+        grade: 9,
+        subject: 'ips',
+        subjectName: 'IPS',
+        subjectIcon: '🌏',
+        title: 'Globalisasi & Perubahan Sosial Budaya',
+        estTime: '12 Menit',
+        summary: 'Globalisasi adalah proses integrasi internasional yang terjadi karena pertukaran pandangan dunia, produk, pemikiran, dan aspek-aspek kebudayaan lainnya, didorong oleh kemajuan teknologi komunikasi dan transportasi.',
+        visual: 'Kemajuan IPTEK ➔ Batas Negara Memudar ➔ Pertukaran Budaya, Ekonomi & Informasi Global',
+        example: 'Kamu bisa menonton pertandingan sepak bola di belahan benua lain secara live streaming atau memesan barang dari luar negeri melalui smartphone.',
+        bullets: ['Bentuk globalisasi: Ekonomi, Komunikasi, Iptek, Budaya.', 'Dampak positif: Kemudahan informasi, efisiensi kerja.', 'Upaya melestarikan jati diri kearifan lokal di era modern.'],
+        questions: [
+          {
+            q: "Faktor pendorong utama terjadinya arus globalisasi di abad ke-21 adalah...",
+            options: ["Perkembangan pesat teknologi informasi dan transportasi", "Penurunan jumlah penduduk dunia", "Tertutupnya perdagangan internasional", "Hilangnya sistem pendidikan"],
+            correct: 0,
+            expl: "Internet dan transportasi modern mempercepat arus informasi dan perdagangan."
+          },
+          {
+            q: "Dampak positif globalisasi di bidang pendidikan adalah...",
+            options: ["Meningkatnya kecurangan ujian", "Kemudahan mengakses sumber belajar dan jurnal dunia", "Ketergantungan pada media sosial", "Lunturnya bahasa daerah"],
+            correct: 1,
+            expl: "Pelajar dapat mengakses buku dan referensi berkualitas dari mana pun di dunia."
+          },
+          {
+            q: "Sikap bijak menghadapi pengaruh budaya asing yang masuk adalah...",
+            options: ["Meniru semua hal tanpa memilih", "Menutup diri dari segala bentuk teknologi", "Menyaring secara kritis yang sesuai dengan nilai luhur Pancasila", "Meninggalkan seluruh adat tradisi lokal"],
+            correct: 2,
+            expl: "Filtrasi budaya yang cerdas menjaga jati diri dan moral bangsa."
+          },
+          {
+            q: "Kondisi di mana masyarakat mengalami ketertinggalan dalam mengimbangi perubahan teknologi disebut...",
+            options: ["Cultural Shock", "Cultural Lag", "Asimilasi", "Akulturasi"],
+            correct: 1,
+            expl: "Cultural lag (kesenjangan budaya) terjadi saat teknologi maju tapi mentalitas lambat menyesuaikan."
+          },
+          {
+            q: "Contoh globalisasi di bidang ekonomi adalah...",
+            options: ["Pasar bebas dan perdagangan elektronik lintas negara", "Belajar bahasa daerah di sekolah", "Mendengarkan dongeng sebelum tidur", "Upacara bendera hari Senin"],
+            correct: 0,
+            expl: "E-commerce internasional dan pasar bebas adalah ciri khas globalisasi ekonomi."
+          }
+        ]
+      }
+    ];
+
+    /* ==============================================================
+       APP STATE & LOCAL STORAGE PERSISTENCE
+       ============================================================== */
+    const DEFAULT_STATE = {
+      grade: 8,
+      mood: 'semangat',
+      moodLabel: '😊 Semangat',
+      moodNote: 'Penuh energi & siap eksplorasi materi hari ini!',
+      learningStyle: 'membaca',
+      styleLabel: '📖 Membaca materi',
+      subject: 'ipa',
+      subjectName: 'IPA',
+      plantExp: 65,
+      plantLevel: 2,
+      water: 3,
+      sun: 2,
+      totalWaterGiven: 14,
+      totalSunGiven: 8,
+      streak: 3,
+      badges: ['starter', 'waterer', 'focus', 'quizzer'],
+      tasks: [
+        { id: 1, title: 'Baca Rangkuman Alveolus Sistem Pernapasan', deadline: 'Hari Ini, 16.00', done: true },
+        { id: 2, title: 'Latihan 5 Soal Pythagoras Matematika', deadline: 'Besok, 14.00', done: false },
+        { id: 3, title: 'Catat Kosakata Baru Bahasa Inggris Recount', deadline: 'Lusa, 19.00', done: false }
+      ],
+      schedules: [
+        { day: 'Senin', items: ['➗ Matematika (08.00)', '🔬 IPA (10.00)'] },
+        { day: 'Selasa', items: ['🇮🇩 B. Indonesia (08.00)', '🇬🇧 B. Inggris (10.00)'] },
+        { day: 'Rabu', items: ['🌏 IPS (08.00)', '🌱 Study Garden & Kuis (13.00)'] },
+        { day: 'Kamis', items: ['➗ MTK Latihan (09.00)', '🔬 Eksperimen IPA (11.00)'] },
+        { day: 'Jumat', items: ['📖 Membaca Mandiri (08.00)', '✨ Evaluasi Mingguan (14.00)'] }
+      ],
+      flashcardsSeen: 4
+    };
+
+    let appState = JSON.parse(localStorage.getItem('teman_belajar_state')) || DEFAULT_STATE;
+
+    function saveState() {
+      localStorage.setItem('teman_belajar_state', JSON.stringify(appState));
+    }
+
+    // Dynamic Level Calculation
+    function getPlantStageInfo(exp) {
+      if (exp < 50) {
+        return { lvl: 1, name: 'Bibit Kecil', icon: '🌱', speech: 'Ayo mulai belajar untuk menumbuhkan aku!' };
+      } else if (exp < 150) {
+        return { lvl: 2, name: 'Tunas Muda', icon: '🌿', speech: 'Kamu sudah belajar konsisten! Daunku makin segar 🌱' };
+      } else if (exp < 300) {
+        return { lvl: 3, name: 'Tanaman Rimbun', icon: '🪴', speech: 'Luar biasa! Pemahamanmu makin berakar kokoh!' };
+      } else if (exp < 500) {
+        return { lvl: 4, name: 'Pohon Pelindung', icon: '🌳', speech: 'Pohon belajarmu meneduhkan hati dan pikiran.' };
+      } else {
+        return { lvl: 5, name: 'Pohon Bunga & Buah', icon: '🌸', speech: 'Hebat sekali! Kamu adalah pembelajar sejati 🌸' };
+      }
+    }
+
+    // Flashcard deck for Kuis Cepat
+    const FLASHCARDS = [
+      {
+        subj: 'Matematika',
+        q: '"Rumus Teorema Pythagoras untuk segitiga siku-siku dengan sisi miring c adalah..."',
+        a: 'c² = a² + b²'
+      },
+      {
+        subj: 'IPA',
+        q: '"Kantung tipis di paru-paru tempat bertukarnya oksigen dan karbondioksida dinamakan..."',
+        a: 'Alveolus'
+      },
+      {
+        subj: 'Bahasa Inggris',
+        q: '"Bentuk Past Tense (V2) dari kata kerja \'eat\' adalah..."',
+        a: 'Ate'
+      },
+      {
+        subj: 'IPS',
+        q: '"Tiga kegiatan utama perekonomian masyarakat adalah..."',
+        a: 'Produksi, Distribusi, dan Konsumsi'
+      },
+      {
+        subj: 'Bahasa Indonesia',
+        q: '"Majas yang mengumpamakan benda mati berperilaku seperti manusia hidup disebut..."',
+        a: 'Personifikasi'
+      }
+    ];
+    let currentFlashcardIndex = 0;
+
+    // Inspirational quotes
+    const DAILY_QUOTES = [
+      { quote: "Setiap usaha kecil yang kamu lakukan hari ini adalah air yang membuat tanaman masa depanmu berbunga indah.", author: "Teman Belajar" },
+      { quote: "Belajar bukan soal menjadi yang tercepat, melainkan tentang tumbuh dengan nyaman sesuai ritmemu sendiri.", author: "Kearifan Belajar" },
+      { quote: "Tak ada tanaman yang mekar dalam semalam. Beri dirimu waktu, ruang bernapas, dan ketekunan lembut.", author: "Taman Ilmu" },
+      { quote: "Bila pikiran sedang lelah, istirahatlah sejenak. Tanamanmu akan tetap setia menunggumu tersenyum kembali.", author: "Sahabat Sejati" }
+    ];
+
+    /* ==============================================================
+       NAVIGATION / TAB SWITCHING
+       ============================================================== */
+    function switchTab(tabId) {
+      // Hide all views
+      const views = ['beranda', 'materi', 'garden', 'latihan', 'kuis', 'jadwal', 'todo', 'prestasi', 'profil'];
+      views.forEach(v => {
+        const el = document.getElementById('view-' + v);
+        if (el) el.classList.add('hidden');
+      });
+
+      // Show selected view
+      const target = document.getElementById('view-' + tabId);
+      if (target) target.classList.remove('hidden');
+
+      // Update sidebar active styling
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.remove('bg-brand-100/70', 'font-semibold', 'text-brand-700', 'shadow-xs');
+        btn.classList.add('text-gray-600');
+      });
+
+      const activeBtn = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-gray-600');
+        activeBtn.classList.add('bg-brand-100/70', 'font-semibold', 'text-brand-700', 'shadow-xs');
+      }
+
+      // Update Topbar Title
+      const pageTitles = {
+        beranda: { icon: '🌱', title: 'Beranda Teman Belajar', sub: 'Belajar sesuai dirimu, tumbuh setiap hari.' },
+        materi: { icon: '📚', title: 'Materi Kurikulum Merdeka', sub: 'Ringkasan padat, visualisasi, dan pemahaman konsep.' },
+        garden: { icon: '🪴', title: 'Study Garden Virtual', sub: 'Rawat tanaman belajarmu dengan air dan sinar matahari.' },
+        latihan: { icon: '📝', title: 'Latihan Soal & Pembahasan', sub: 'Uji pemahaman mandiri dengan umpan balik langsung.' },
+        kuis: { icon: '🧠', title: 'Kuis Cepat Kilat', sub: 'Kuis 3 menit yang ramah untuk pikiran santai.' },
+        jadwal: { icon: '📅', title: 'Jadwal Belajar Mingguan', sub: 'Rancang ritme belajarmu yang nyaman dan teratur.' },
+        todo: { icon: '✅', title: 'Daftar Tugas & Target', sub: 'Selesaikan tugas untuk mendapatkan nutrisi kebun.' },
+        prestasi: { icon: '🏆', title: 'Poin & Prestasi Kamu', sub: 'Lihat koleksi lencana dan perkembangan EXP belajarmu.' },
+        profil: { icon: '👤', title: 'Profil Belajarmu', sub: 'Atur kelas, gaya belajar, dan preferensi akun.' }
+      };
+
+      if (pageTitles[tabId]) {
+        document.getElementById('page-icon').textContent = pageTitles[tabId].icon;
+        document.getElementById('page-title').textContent = pageTitles[tabId].title;
+        document.getElementById('page-subtitle').textContent = pageTitles[tabId].sub;
+      }
+
+      // Mobile close menu
+      const sidebarNav = document.getElementById('sidebar-nav');
+      if (window.innerWidth < 768) {
+        sidebarNav.classList.add('hidden');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleMobileMenu() {
+      const nav = document.getElementById('sidebar-nav');
+      nav.classList.toggle('hidden');
+    }
+
+    /* ==============================================================
+       ONBOARDING / CHECK-IN MODAL MULTI-STEP LOGIC
+       ============================================================== */
+    let checkinStep = 1;
+    let tempCheckin = {
+      grade: appState.grade,
+      mood: appState.mood,
+      moodLabel: appState.moodLabel,
+      moodNote: appState.moodNote,
+      learningStyle: appState.learningStyle,
+      styleLabel: appState.styleLabel,
+      subject: appState.subject,
+      subjectName: appState.subjectName
+    };
+
+    function openCheckinModal() {
+      checkinStep = 1;
+      tempCheckin = {
+        grade: appState.grade,
+        mood: appState.mood,
+        moodLabel: appState.moodLabel,
+        moodNote: appState.moodNote,
+        learningStyle: appState.learningStyle,
+        styleLabel: appState.styleLabel,
+        subject: appState.subject,
+        subjectName: appState.subjectName
+      };
+      updateCheckinModalUI();
+      document.getElementById('checkin-modal').classList.remove('hidden');
+    }
+
+    function closeCheckinModal() {
+      document.getElementById('checkin-modal').classList.add('hidden');
+    }
+
+    function updateCheckinModalUI() {
+      // Step titles
+      const titles = [
+        "👋 Kamu sekarang kelas berapa?",
+        "💭 Bagaimana perasaanmu hari ini?",
+        "🎯 Kamu ingin belajar seperti apa?",
+        "📚 Hari ini mau belajar apa?"
+      ];
+      document.getElementById('step-badge').textContent = `Langkah ${checkinStep} dari 4`;
+      document.getElementById('checkin-step-title').textContent = titles[checkinStep - 1];
+
+      // Step indicator bars
+      for (let i = 1; i <= 4; i++) {
+        const bar = document.getElementById(`step-bar-${i}`);
+        if (i <= checkinStep) {
+          bar.className = 'h-1.5 flex-1 rounded-full bg-brand-500 transition-all';
+        } else {
+          bar.className = 'h-1.5 flex-1 rounded-full bg-gray-200 transition-all';
+        }
+      }
+
+      // Hide/Show step panes
+      for (let i = 1; i <= 4; i++) {
+        const pane = document.getElementById(`step-content-${i}`);
+        if (pane) {
+          if (i === checkinStep) pane.classList.remove('hidden');
+          else pane.classList.add('hidden');
+        }
+      }
+
+      // Buttons state
+      const prevBtn = document.getElementById('btn-step-prev');
+      const nextBtn = document.getElementById('btn-step-next');
+
+      prevBtn.disabled = (checkinStep === 1);
+      if (checkinStep === 1) {
+        prevBtn.classList.add('text-gray-400', 'cursor-not-allowed');
+      } else {
+        prevBtn.classList.remove('text-gray-400', 'cursor-not-allowed');
+      }
+
+      if (checkinStep === 4) {
+        nextBtn.innerHTML = 'Selesai & Sesuaikan ✨';
+      } else {
+        nextBtn.innerHTML = 'Lanjut &rarr;';
+      }
+
+      // Sync active button highlights
+      highlightActiveCheckinButtons();
+    }
+
+    function highlightActiveCheckinButtons() {
+      // Grade buttons
+      document.querySelectorAll('.grade-opt-btn').forEach(btn => {
+        const val = parseInt(btn.getAttribute('data-val'));
+        if (val === tempCheckin.grade) {
+          btn.className = 'grade-opt-btn p-4 rounded-2xl border-2 border-brand-500 bg-brand-50 text-center transition group active:scale-95';
+        } else {
+          btn.className = 'grade-opt-btn p-4 rounded-2xl border-2 border-brand-100 hover:border-brand-500 hover:bg-brand-50 text-center transition group active:scale-95';
+        }
+      });
+
+      // Mood buttons
+      document.querySelectorAll('.mood-opt-btn').forEach(btn => {
+        const m = btn.getAttribute('data-mood');
+        if (m === tempCheckin.mood) {
+          btn.className = 'mood-opt-btn p-3.5 rounded-2xl border-2 border-brand-500 bg-brand-50 flex items-center gap-3 text-left transition';
+        } else {
+          btn.className = 'mood-opt-btn p-3.5 rounded-2xl border-2 border-brand-100 hover:border-brand-400 flex items-center gap-3 text-left transition';
+        }
+      });
+
+      // Style buttons
+      document.querySelectorAll('.style-opt-btn').forEach(btn => {
+        const s = btn.getAttribute('data-style');
+        if (s === tempCheckin.learningStyle) {
+          btn.className = 'style-opt-btn w-full p-3 rounded-2xl border-2 border-brand-500 bg-brand-50 text-left flex items-center gap-3 transition';
+        } else {
+          btn.className = 'style-opt-btn w-full p-3 rounded-2xl border-2 border-brand-100 hover:border-brand-400 text-left flex items-center gap-3 transition';
+        }
+      });
+
+      // Subject buttons
+      document.querySelectorAll('.subj-opt-btn').forEach(btn => {
+        const sub = btn.getAttribute('data-sub');
+        if (sub === tempCheckin.subject) {
+          btn.className = 'subj-opt-btn p-3 rounded-2xl border-2 border-brand-500 bg-brand-50 flex items-center gap-3 text-left transition';
+        } else {
+          btn.className = 'subj-opt-btn p-3 rounded-2xl border-2 border-brand-100 hover:border-brand-500 flex items-center gap-3 text-left transition';
+        }
+      });
+    }
+
+    function selectCheckinGrade(gradeNum) {
+      tempCheckin.grade = gradeNum;
+      highlightActiveCheckinButtons();
+    }
+
+    function selectCheckinMood(moodKey, label, note) {
+      tempCheckin.mood = moodKey;
+      tempCheckin.moodLabel = label;
+      tempCheckin.moodNote = note;
+      highlightActiveCheckinButtons();
+    }
+
+    function selectCheckinStyle(styleKey, label) {
+      tempCheckin.learningStyle = styleKey;
+      tempCheckin.styleLabel = label;
+      highlightActiveCheckinButtons();
+    }
+
+    function selectCheckinSubject(subjKey, name, icon) {
+      tempCheckin.subject = subjKey;
+      tempCheckin.subjectName = name;
+      highlightActiveCheckinButtons();
+    }
+
+    function prevCheckinStep() {
+      if (checkinStep > 1) {
+        checkinStep--;
+        updateCheckinModalUI();
+      }
+    }
+
+    function nextCheckinStep() {
+      if (checkinStep < 4) {
+        checkinStep++;
+        updateCheckinModalUI();
+      } else {
+        // Finish Check-in
+        applyCheckinResults();
+      }
+    }
+
+    function applyCheckinResults() {
+      appState.grade = tempCheckin.grade;
+      appState.mood = tempCheckin.mood;
+      appState.moodLabel = tempCheckin.moodLabel;
+      appState.moodNote = tempCheckin.moodNote;
+      appState.learningStyle = tempCheckin.learningStyle;
+      appState.styleLabel = tempCheckin.styleLabel;
+      appState.subject = tempCheckin.subject;
+      appState.subjectName = tempCheckin.subjectName;
+
+      // Reward student for daily checkin with 1 Water
+      appState.water += 1;
+      saveState();
+
+      closeCheckinModal();
+      renderAll();
+      showToast('🌱 Check-in Berhasil!', 'Materi telah disesuaikan & kamu mendapat +1 Ember Air!');
+      triggerConfetti();
+    }
+
+    /* ==============================================================
+       RENDERING & DYNAMIC ADAPTIVE ENGINE
+       ============================================================== */
+    function renderAll() {
+      const stage = getPlantStageInfo(appState.plantExp);
+      appState.plantLevel = stage.lvl;
+
+      // 1. Sidebar mini badge
+      const moodEmojis = { semangat: '😊', biasa: '😐', ngantuk: '😴', pusing: '😵', kurang_semangat: '😔' };
+      document.getElementById('nav-mood-emoji').textContent = moodEmojis[appState.mood] || '😊';
+      document.getElementById('nav-user-grade').textContent = `Kelas ${appState.grade} • MTs/SMP`;
+      document.getElementById('nav-user-mood-text').textContent = appState.moodLabel.replace(/^[^\s]+\s/, '');
+      document.getElementById('garden-badge-pill').textContent = `Lv.${stage.lvl}`;
+
+      document.getElementById('sidebar-water').textContent = appState.water;
+      document.getElementById('sidebar-sun').textContent = appState.sun;
+      
+      const expPercent = Math.min(100, Math.round((appState.plantExp % 100)));
+      document.getElementById('sidebar-exp-bar').style.width = `${expPercent}%`;
+
+      // 2. Topbar points
+      document.getElementById('topbar-points').textContent = `${appState.plantExp} Poin EXP`;
+      document.getElementById('header-mood-icon').textContent = moodEmojis[appState.mood] || '😊';
+
+      // 3. Beranda Hero
+      document.getElementById('hero-tagline-text').textContent = `Kurikulum Merdeka • Kelas ${appState.grade} MTs/SMP`;
+      document.getElementById('hero-mood-name').textContent = appState.moodLabel.replace(/^[^\s]+\s/, '');
+      document.getElementById('hero-advice').innerHTML = `Kamu sedang merasa <span class="font-bold underline">${appState.moodLabel}</span>. ${appState.moodNote}`;
+      document.getElementById('hero-garden-icon').textContent = stage.icon;
+      document.getElementById('hero-plant-stage').textContent = stage.name;
+      document.getElementById('hero-plant-level').textContent = `Level ${stage.lvl} • ${appState.plantExp} EXP`;
+
+      // 4. Recommendation Engine
+      renderAdaptiveRecommendation();
+
+      // 5. Mini Garden on Beranda
+      document.getElementById('mini-garden-level').textContent = `Level ${stage.lvl}`;
+      document.getElementById('mini-plant-visual').textContent = stage.icon;
+      document.getElementById('mini-garden-exp-text').textContent = `${expPercent}%`;
+      document.getElementById('mini-garden-exp-bar').style.width = `${expPercent}%`;
+
+      // 6. Home Tasks
+      renderHomeTodoList();
+
+      // 7. Quick Subjects
+      renderQuickSubjectCards();
+
+      // 8. Garden Tab
+      renderGardenTab(stage, expPercent);
+
+      // 9. Schedules Tab
+      renderScheduleGrid();
+
+      // 10. Todo Tab
+      renderTodoTabList();
+
+      // 11. Achievements Tab
+      renderBadgesShelf();
+
+      // 12. Profil Tab
+      renderProfileTab(stage);
+
+      // 13. Materi List
+      renderMateriList();
+    }
+
+    // Adaptive Engine Implementation
+    function renderAdaptiveRecommendation() {
+      // Find suitable curriculum item
+      let filtered = CURRICULUM_DATA.filter(m => m.grade === appState.grade && m.subject === appState.subject);
+      if (filtered.length === 0) {
+        filtered = CURRICULUM_DATA.filter(m => m.grade === appState.grade);
+      }
+      const item = filtered[0] || CURRICULUM_DATA[0];
+
+      // Dynamic custom advice based on mood and style
+      let adaptiveAdvice = "";
+      let recommendedTime = item.estTime;
+
+      if (appState.mood === 'ngantuk' || appState.mood === 'pusing') {
+        adaptiveAdvice = `Karena energimu sedang santai (${appState.moodLabel}), kami menyederhanakan materi ini menjadi poin-poin visual yang ringan dibaca tanpa rumus rumit.`;
+        recommendedTime = "5-8 Menit (Bite-sized)";
+      } else if (appState.mood === 'kurang_semangat') {
+        adaptiveAdvice = `Tak perlu terburu-buru, pelajari satu contoh sederhana saja untuk membuat pohon belajarmu tetap tersenyum hari ini 🌱`;
+      } else {
+        adaptiveAdvice = `Energi belajarmu luar biasa (${appState.moodLabel})! Yuk kuasai konsep ${item.title} secara tuntas dan kerjakan soal pemahamannya.`;
+      }
+
+      document.getElementById('rec-title').textContent = `${item.subjectIcon} ${item.subjectName}: ${item.title}`;
+      document.getElementById('rec-style-badge').textContent = appState.styleLabel;
+      document.getElementById('adaptive-note-text').textContent = adaptiveAdvice;
+      document.getElementById('rec-time').textContent = recommendedTime;
+      document.getElementById('rec-card-topic').textContent = item.title;
+      document.getElementById('rec-card-subject').textContent = `${item.subjectName} • Kurikulum Merdeka`;
+      document.getElementById('rec-subject-avatar').textContent = item.subjectIcon;
+
+      // Bullets
+      const bulletContainer = document.getElementById('rec-preview-bullets');
+      bulletContainer.innerHTML = '';
+      item.bullets.forEach(b => {
+        const li = document.createElement('li');
+        li.className = 'flex items-center gap-2';
+        li.innerHTML = `<i class="fa-solid fa-check text-brand-500 text-xs"></i> ${b}`;
+        bulletContainer.appendChild(li);
+      });
+
+      // Save pointer to currently recommended topic
+      window.currentRecommendedItem = item;
+    }
+
+    function openMateriDetailFromCurrentRec() {
+      if (window.currentRecommendedItem) {
+        openMateriModal(window.currentRecommendedItem);
+      }
+    }
+
+    function startAdaptiveSession() {
+      openMateriDetailFromCurrentRec();
+    }
+
+    function startQuickQuizFromCurrentRec() {
+      if (window.currentRecommendedItem) {
+        startQuizRunner(window.currentRecommendedItem);
+      }
+    }
+
+    // Quick Subject Cards on Home
+    function renderQuickSubjectCards() {
+      const grid = document.getElementById('quick-subject-grid');
+      document.getElementById('quick-subject-grade').textContent = `Kelas ${appState.grade}`;
+
+      const subjects = [
+        { id: 'matematika', name: 'Matematika', icon: '➗', color: 'from-blue-50 to-indigo-50 border-blue-200' },
+        { id: 'ipa', name: 'IPA', icon: '🔬', color: 'from-emerald-50 to-teal-50 border-emerald-200' },
+        { id: 'inggris', name: 'B. Inggris', icon: '🇬🇧', color: 'from-purple-50 to-pink-50 border-purple-200' },
+        { id: 'indonesia', name: 'B. Indonesia', icon: '🇮🇩', color: 'from-amber-50 to-orange-50 border-amber-200' },
+        { id: 'ips', name: 'IPS', icon: '🌏', color: 'from-cyan-50 to-sky-50 border-cyan-200' },
+      ];
+
+      grid.innerHTML = '';
+      subjects.forEach(s => {
+        const isCurrent = (s.id === appState.subject);
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-2xl border cursor-pointer transition hover:scale-102 flex flex-col items-center text-center ${s.color} ${isCurrent ? 'ring-2 ring-brand-500 shadow-soft' : ''}`;
+        card.onclick = () => {
+          appState.subject = s.id;
+          appState.subjectName = s.name;
+          saveState();
+          renderAll();
+          showToast('Mata Pelajaran Diganti', `Fokus belajar diubah ke ${s.name}`);
+        };
+        card.innerHTML = `
+          <span class="text-3xl mb-1.5">${s.icon}</span>
+          <span class="font-bold text-xs text-gray-800">${s.name}</span>
+          <span class="text-[10px] text-gray-500 mt-0.5">${isCurrent ? '● Sedang Aktif' : 'Pilih'}</span>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Garden Sanctuary View
+    function renderGardenTab(stage, expPercent) {
+      document.getElementById('garden-stage-name').textContent = `${stage.name} (Level ${stage.lvl})`;
+      document.getElementById('main-plant-graphic').textContent = stage.icon;
+      document.getElementById('plant-speech-bubble').textContent = `"${stage.speech}"`;
+      document.getElementById('garden-water-count').textContent = appState.water;
+      document.getElementById('garden-sun-count').textContent = appState.sun;
+
+      // Highlight active stage card
+      for (let i = 1; i <= 5; i++) {
+        const c = document.getElementById(`stage-card-${i}`);
+        if (c) {
+          if (i === stage.lvl) {
+            c.className = 'p-3 rounded-2xl border flex items-center gap-3 bg-brand-50 border-brand-400 shadow-2xs font-semibold';
+          } else if (i < stage.lvl) {
+            c.className = 'p-3 rounded-2xl border flex items-center gap-3 bg-white border-emerald-200 opacity-90';
+          } else {
+            c.className = 'p-3 rounded-2xl border flex items-center gap-3 bg-gray-50 border-gray-100 opacity-50';
+          }
+        }
+      }
+    }
+
+    // Nurture Plant Action
+    function nurturePlant(type) {
+      if (type === 'water') {
+        if (appState.water <= 0) {
+          showToast('Air Habis! 💧', 'Selesaikan latihan soal, to-do list, atau kuis untuk dapat ember air!');
+          return;
+        }
+        appState.water--;
+        appState.plantExp += 15;
+        appState.totalWaterGiven++;
+        showToast('Tanaman Disiram! 💧', '+15 EXP untuk pohon belajarmu!');
+      } else if (type === 'sun') {
+        if (appState.sun <= 0) {
+          showToast('Sinar Mentari Habis! ☀️', 'Kerjakan Kuis Cepat untuk mengumpulkan berkas sinar mentari!');
+          return;
+        }
+        appState.sun--;
+        appState.plantExp += 20;
+        appState.totalSunGiven++;
+        showToast('Fotosintesis Sempurna! ☀️', '+20 EXP untuk pohon belajarmu!');
+      }
+
+      // Check level evolution
+      const newStage = getPlantStageInfo(appState.plantExp);
+      if (newStage.lvl > appState.plantLevel) {
+        triggerConfetti();
+        showToast('Pohon Berevolusi! 🎉', `Selamat! Tanamanmu naik menjadi ${newStage.name}!`);
+      }
+
+      // Add to log
+      const log = document.getElementById('garden-activity-log');
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const li = document.createElement('li');
+      li.className = 'flex items-center gap-2';
+      li.innerHTML = `<span class="w-2 h-2 rounded-full ${type === 'water' ? 'bg-blue-500' : 'bg-amber-500'}"></span> Memberi ${type === 'water' ? 'Air (+15 EXP)' : 'Sinar (+20 EXP)'} (${timeStr})`;
+      if (log.firstChild) log.insertBefore(li, log.firstChild);
+      else log.appendChild(li);
+
+      saveState();
+      renderAll();
+    }
+
+    // Materi List View
+    let currentGradeFilter = 8;
+    let currentSubjectFilter = 'all';
+
+    function filterGrade(g) {
+      currentGradeFilter = g;
+      document.querySelectorAll('.grade-filter-btn').forEach(btn => {
+        const val = parseInt(btn.getAttribute('data-grade'));
+        if (val === g) {
+          btn.className = 'grade-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition bg-brand-600 text-white shadow-xs';
+        } else {
+          btn.className = 'grade-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition border border-brand-200 text-brand-700 hover:bg-brand-50';
+        }
+      });
+      renderMateriList();
+    }
+
+    function filterSubject(sub) {
+      currentSubjectFilter = sub;
+      document.querySelectorAll('.subject-filter-btn').forEach(btn => {
+        const val = btn.getAttribute('data-subj');
+        if (val === sub) {
+          btn.className = 'subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-100 text-brand-800';
+        } else {
+          btn.className = 'subject-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-brand-50';
+        }
+      });
+      renderMateriList();
+    }
+
+    function renderMateriList() {
+      const container = document.getElementById('materi-grid');
+      container.innerHTML = '';
+
+      let items = CURRICULUM_DATA.filter(m => m.grade === currentGradeFilter);
+      if (currentSubjectFilter !== 'all') {
+        items = items.filter(m => m.subject === currentSubjectFilter);
+      }
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center text-gray-400">
+            <span class="text-4xl block mb-2">🌿</span>
+            <p class="text-sm font-semibold">Belum ada modul untuk filter ini.</p>
+          </div>
+        `;
+        return;
+      }
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-3xl p-5 border border-brand-100 shadow-card hover:shadow-soft transition flex flex-col justify-between space-y-4';
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-brand-50 text-brand-700 font-bold border border-brand-200">${item.subjectIcon} ${item.subjectName}</span>
+              <span class="text-gray-400"><i class="fa-regular fa-clock mr-1"></i>${item.estTime}</span>
+            </div>
+            <h4 class="font-bold text-base text-gray-900 leading-snug">${item.title}</h4>
+            <p class="text-xs text-gray-500 mt-2 line-clamp-3 leading-relaxed">${item.summary}</p>
+          </div>
+
+          <div class="pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+            <button onclick='openMateriModalById("${item.id}")' class="flex-1 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-xl text-xs transition text-center">
+              📖 Buka Materi
+            </button>
+            <button onclick='startQuizRunnerById("${item.id}")' class="px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold rounded-xl text-xs transition" title="Latihan 5 Soal">
+              <i class="fa-solid fa-pen-fancy"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openMateriModalById(id) {
+      const item = CURRICULUM_DATA.find(x => x.id === id);
+      if (item) openMateriModal(item);
+    }
+
+    function openMateriModal(item) {
+      window.activeModalItem = item;
+      document.getElementById('modal-materi-badge').textContent = `${item.subjectIcon} ${item.subjectName} • KELAS ${item.grade}`;
+      document.getElementById('modal-materi-title').textContent = item.title;
+      document.getElementById('modal-materi-summary').innerHTML = `<p>${item.summary}</p>`;
+      document.getElementById('modal-materi-visual').innerHTML = `<pre class="whitespace-pre-wrap font-sans text-xs sm:text-sm text-brand-900">${item.visual}</pre>`;
+      document.getElementById('modal-materi-example').innerHTML = `<p><strong>Contoh Aplikasi:</strong> ${item.example}</p>`;
+
+      document.getElementById('materi-modal').classList.remove('hidden');
+    }
+
+    function closeMateriModal() {
+      document.getElementById('materi-modal').classList.add('hidden');
+    }
+
+    function startQuizFromModal() {
+      closeMateriModal();
+      if (window.activeModalItem) {
+        startQuizRunner(window.activeModalItem);
+      }
+    }
+
+    // Latihan Soal Runner
+    let activeQuizItem = null;
+    let quizQuestionIndex = 0;
+    let quizScore = 0;
+
+    function startQuizRunnerById(id) {
+      const item = CURRICULUM_DATA.find(x => x.id === id);
+      if (item) startQuizRunner(item);
+    }
+
+    function startQuizRunner(item) {
+      activeQuizItem = item;
+      quizQuestionIndex = 0;
+      quizScore = 0;
+      switchTab('latihan');
+
+      document.getElementById('quiz-runner-title').textContent = `Latihan: ${item.title}`;
+      document.getElementById('quiz-runner-subtitle').textContent = `Mata Pelajaran ${item.subjectName} • Kurikulum Merdeka Kelas ${item.grade}`;
+      document.getElementById('quiz-active-box').classList.remove('hidden');
+      document.getElementById('quiz-completed-box').classList.add('hidden');
+
+      loadQuizQuestion();
+    }
+
+    function loadQuizQuestion() {
+      if (!activeQuizItem) return;
+      const qData = activeQuizItem.questions[quizQuestionIndex];
+      const total = activeQuizItem.questions.length;
+
+      document.getElementById('quiz-counter').textContent = `${quizQuestionIndex + 1} dari ${total}`;
+      const pct = Math.round(((quizQuestionIndex + 1) / total) * 100);
+      document.getElementById('quiz-progress-fill').style.width = `${pct}%`;
+
+      document.getElementById('quiz-question-category').textContent = `${activeQuizItem.subjectName} • KELAS ${activeQuizItem.grade}`;
+      document.getElementById('quiz-question-text').textContent = qData.q;
+
+      // Hide explanation & disable next
+      const explBox = document.getElementById('quiz-explanation-box');
+      explBox.classList.add('hidden');
+      const nextBtn = document.getElementById('quiz-next-btn');
+      nextBtn.disabled = true;
+      nextBtn.className = 'px-6 py-2.5 bg-gray-300 text-gray-500 cursor-not-allowed font-bold rounded-xl text-sm transition';
+
+      // Render options
+      const optContainer = document.getElementById('quiz-options-container');
+      optContainer.innerHTML = '';
+
+      qData.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quiz-opt-btn w-full p-4 rounded-2xl border-2 border-gray-200 hover:border-sky-400 text-left font-medium text-sm text-gray-800 transition flex items-center justify-between';
+        btn.innerHTML = `
+          <span>${String.fromCharCode(65 + idx)}. ${optText}</span>
+          <i class="fa-regular fa-circle text-gray-300"></i>
+        `;
+        btn.onclick = () => selectQuizAnswer(idx, btn);
+        optContainer.appendChild(btn);
+      });
+    }
+
+    function selectQuizAnswer(selectedIdx, clickedBtn) {
+      const qData = activeQuizItem.questions[quizQuestionIndex];
+      const buttons = document.querySelectorAll('.quiz-opt-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      const isCorrect = (selectedIdx === qData.correct);
+      if (isCorrect) {
+        quizScore++;
+        clickedBtn.className = 'quiz-opt-btn w-full p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-left font-semibold text-sm text-emerald-900 transition flex items-center justify-between';
+        clickedBtn.querySelector('i').className = 'fa-solid fa-circle-check text-emerald-600 text-base';
+        document.getElementById('quiz-result-title').textContent = 'Hebat! Jawabanmu Benar 🌱';
+        document.getElementById('quiz-explanation-box').className = 'p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-sm space-y-2';
+      } else {
+        clickedBtn.className = 'quiz-opt-btn w-full p-4 rounded-2xl border-2 border-rose-400 bg-rose-50 text-left font-semibold text-sm text-rose-900 transition flex items-center justify-between';
+        clickedBtn.querySelector('i').className = 'fa-solid fa-circle-xmark text-rose-500 text-base';
+        
+        // highlight correct answer
+        buttons[qData.correct].className = 'quiz-opt-btn w-full p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/70 text-left font-semibold text-sm text-emerald-900 transition flex items-center justify-between';
+        
+        document.getElementById('quiz-result-title').textContent = 'Kurang Tepat, Tapi Jangan Khawatir!';
+        document.getElementById('quiz-explanation-box').className = 'p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-sm space-y-2';
+      }
+
+      document.getElementById('quiz-explanation-text').textContent = `Pembahasan: ${qData.expl}`;
+      document.getElementById('quiz-explanation-box').classList.remove('hidden');
+
+      // Enable Next Button
+      const nextBtn = document.getElementById('quiz-next-btn');
+      nextBtn.disabled = false;
+      nextBtn.className = 'px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white cursor-pointer font-bold rounded-xl text-sm shadow-soft transition';
+    }
+
+    function nextQuestion() {
+      quizQuestionIndex++;
+      if (quizQuestionIndex < activeQuizItem.questions.length) {
+        loadQuizQuestion();
+      } else {
+        finishQuizRunner();
+      }
+    }
+
+    function finishQuizRunner() {
+      document.getElementById('quiz-active-box').classList.add('hidden');
+      document.getElementById('quiz-completed-box').classList.remove('hidden');
+
+      // Rewards
+      const earnedExp = quizScore * 10 + 10;
+      appState.plantExp += earnedExp;
+      appState.water += 2;
+      appState.sun += 1;
+      saveState();
+      renderAll();
+
+      document.getElementById('quiz-summary-score').innerHTML = `
+        Kamu berhasil menjawab <strong>${quizScore} dari ${activeQuizItem.questions.length} soal</strong> dengan benar!<br/>
+        Hadiah tanaman: <strong>+${earnedExp} EXP</strong>, <strong>+2 Ember Air 💧</strong>, dan <strong>+1 Sinar Mentari ☀️</strong>!
+      `;
+
+      triggerConfetti();
+    }
+
+    function resetCurrentQuiz() {
+      if (activeQuizItem) {
+        startQuizRunner(activeQuizItem);
+      }
+    }
+
+    // Kuis Cepat Flashcard
+    function toggleFlashcardAnswer() {
+      const el = document.getElementById('flashcard-answer');
+      const btn = document.getElementById('flashcard-btn-reveal');
+      if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        btn.innerHTML = '<i class="fa-regular fa-eye-slash mr-1"></i> Sembunyikan Jawaban';
+      } else {
+        el.classList.add('hidden');
+        btn.innerHTML = '<i class="fa-regular fa-eye mr-1"></i> Buka Kunci Jawaban';
+      }
+    }
+
+    function nextFlashcard() {
+      currentFlashcardIndex = (currentFlashcardIndex + 1) % FLASHCARDS.length;
+      const card = FLASHCARDS[currentFlashcardIndex];
+      document.getElementById('flashcard-badge').textContent = card.subj;
+      document.getElementById('flashcard-question').textContent = card.q;
+      document.getElementById('flashcard-answer').textContent = card.a;
+      document.getElementById('flashcard-answer').classList.add('hidden');
+      document.getElementById('flashcard-btn-reveal').innerHTML = '<i class="fa-regular fa-eye mr-1"></i> Buka Kunci Jawaban';
+
+      appState.flashcardsSeen++;
+      document.getElementById('flash-card-score').textContent = `${appState.flashcardsSeen} Kartu Diingat`;
+      saveState();
+    }
+
+    function claimQuickWaterReward() {
+      appState.water += 1;
+      appState.plantExp += 10;
+      saveState();
+      renderAll();
+      showToast('Klaim Berhasil!', '+1 Ember Air & +10 EXP ditambahkan ke kebunmu! 🌱');
+      triggerConfetti();
+    }
+
+    // Schedule Rendering
+    function renderScheduleGrid() {
+      const container = document.getElementById('schedule-week-grid');
+      container.innerHTML = '';
+
+      appState.schedules.forEach((sch, i) => {
+        const col = document.createElement('div');
+        col.className = 'bg-brand-50/50 rounded-2xl p-4 border border-brand-100 flex flex-col justify-between';
+        col.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between pb-2 mb-3 border-b border-brand-100">
+              <span class="font-bold text-xs text-brand-900">${sch.day}</span>
+              <span class="text-[10px] text-brand-600 font-semibold">${sch.items.length} Sesi</span>
+            </div>
+            <div class="space-y-2 text-xs text-gray-700">
+              ${sch.items.map(it => `
+                <div class="p-2.5 rounded-xl bg-white border border-brand-100 shadow-2xs">
+                  ${it}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        container.appendChild(col);
+      });
+    }
+
+    function openAddScheduleModal() {
+      const subjectPrompt = prompt("Masukkan nama sesi belajar dan jam (contoh: '➗ Latihan Aljabar (15.00)'):");
+      if (subjectPrompt && subjectPrompt.trim() !== "") {
+        appState.schedules[0].items.push(subjectPrompt.trim());
+        saveState();
+        renderScheduleGrid();
+        showToast('Jadwal Ditambahkan', 'Sesi belajar baru tersimpan di hari Senin.');
+      }
+    }
+
+    // To-Do List Management
+    function renderHomeTodoList() {
+      const container = document.getElementById('home-todo-list');
+      container.innerHTML = '';
+
+      const pending = appState.tasks.filter(t => !t.done);
+      document.getElementById('todo-pending-count').textContent = pending.length;
+
+      const displayTasks = appState.tasks.slice(0, 3);
+      if (displayTasks.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 text-center py-2">Semua tugas selesai! Luar biasa 🎉</p>';
+        return;
+      }
+
+      displayTasks.forEach(task => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-2.5 rounded-2xl bg-gray-50 border border-gray-100 text-xs';
+        div.innerHTML = `
+          <label class="flex items-center gap-2 cursor-pointer truncate mr-2">
+            <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTaskDone(${task.id})" class="rounded text-brand-600 focus:ring-brand-400">
+            <span class="${task.done ? 'line-through text-gray-400' : 'text-gray-700 font-medium'} truncate">${task.title}</span>
+          </label>
+          <span class="text-[10px] text-gray-400 shrink-0">${task.deadline}</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderTodoTabList() {
+      const container = document.getElementById('todo-container-list');
+      container.innerHTML = '';
+
+      if (appState.tasks.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-gray-400 text-xs">Belum ada tugas. Tambahkan target belajarmu di atas!</div>';
+        return;
+      }
+
+      appState.tasks.forEach(task => {
+        const item = document.createElement('div');
+        item.className = `p-4 rounded-2xl border transition flex items-center justify-between gap-3 ${task.done ? 'bg-gray-50 border-gray-200' : 'bg-white border-brand-100 shadow-card'}`;
+        item.innerHTML = `
+          <label class="flex items-center gap-3 cursor-pointer flex-1">
+            <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTaskDone(${task.id})" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-400">
+            <div>
+              <p class="text-sm font-semibold ${task.done ? 'line-through text-gray-400' : 'text-gray-800'}">${task.title}</p>
+              <p class="text-xs text-gray-400"><i class="fa-regular fa-clock mr-1"></i>${task.deadline}</p>
+            </div>
+          </label>
+          <button onclick="deleteTask(${task.id})" class="text-gray-400 hover:text-red-500 p-2 text-xs transition">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function handleAddTask(e) {
+      e.preventDefault();
+      const input = document.getElementById('new-todo-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const newTask = {
+        id: Date.now(),
+        title: text,
+        deadline: 'Target Minggu Ini',
+        done: false
+      };
+      appState.tasks.unshift(newTask);
+      input.value = '';
+      saveState();
+      renderAll();
+      showToast('Tugas Baru Ditambahkan!', 'Selesaikan tugas untuk menumbuhkan pohon belajarmu.');
+    }
+
+    function toggleTaskDone(id) {
+      const t = appState.tasks.find(x => x.id === id);
+      if (t) {
+        t.done = !t.done;
+        if (t.done) {
+          appState.water += 1;
+          appState.plantExp += 10;
+          showToast('Tugas Selesai! 🎉', '+1 Ember Air & +10 EXP dihadiahkan!');
+          triggerConfetti();
+        }
+        saveState();
+        renderAll();
+      }
+    }
+
+    function deleteTask(id) {
+      appState.tasks = appState.tasks.filter(x => x.id !== id);
+      saveState();
+      renderAll();
+      showToast('Tugas Dihapus', 'Daftar tugas telah diperbarui.');
+    }
+
+    // Achievements & Badges
+    const BADGES_LIST = [
+      { id: 'starter', name: 'Bibit Harapan', desc: 'Melakukan check-in pertama di Teman Belajar.', icon: '🌱' },
+      { id: 'waterer', name: 'Penyiram Rajin', desc: 'Memberikan air ke tanaman lebih dari 5 kali.', icon: '💧' },
+      { id: 'focus', name: 'Fokus Membara', desc: 'Konsisten belajar 3 hari berturut-turut.', icon: '🔥' },
+      { id: 'quizzer', name: 'Penakluk Soal', desc: 'Menyelesaikan kuis pemahaman materi.', icon: '🧠' },
+      { id: 'curious', name: 'Jiwa Penjelajah', desc: 'Membuka seluruh materi Kurikulum Merdeka.', icon: '🧭' },
+      { id: 'master', name: 'Pohon Pelindung', desc: 'Mencapai Level 4 pada Study Garden.', icon: '🌳' },
+      { id: 'perfectionist', name: 'Bintang Terang', desc: 'Mendapat skor sempurna pada kuis.', icon: '⭐' },
+      { id: 'nature', name: 'Sahabat Alam', desc: 'Mengumpulkan 500 total poin tanaman.', icon: '🌸' }
+    ];
+
+    function renderBadgesShelf() {
+      document.getElementById('stat-total-exp').textContent = `${appState.plantExp} EXP`;
+      document.getElementById('stat-streak').textContent = `${appState.streak} Hari`;
+      document.getElementById('stat-water-given').textContent = `${appState.totalWaterGiven} Kali`;
+      document.getElementById('stat-badges-unlocked').textContent = `${appState.badges.length} dari ${BADGES_LIST.length}`;
+
+      const grid = document.getElementById('badges-shelf-grid');
+      grid.innerHTML = '';
+
+      BADGES_LIST.forEach(b => {
+        const unlocked = appState.badges.includes(b.id);
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-2xl border text-center transition ${unlocked ? 'bg-white border-brand-200 shadow-card' : 'bg-gray-50 border-gray-100 opacity-40'}`;
+        card.innerHTML = `
+          <div class="text-4xl mb-2 filter ${unlocked ? '' : 'grayscale'}">${b.icon}</div>
+          <h4 class="font-bold text-xs text-gray-800">${b.name}</h4>
+          <p class="text-[10px] text-gray-500 mt-1 leading-snug">${b.desc}</p>
+          <span class="inline-block mt-2 text-[9px] font-bold px-2 py-0.5 rounded-full ${unlocked ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-600'}">
+            ${unlocked ? 'TERBUKA' : 'TERKUNCI'}
+          </span>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Profile View
+    function renderProfileTab(stage) {
+      document.getElementById('profile-grade-pill').textContent = `Kelas ${appState.grade}`;
+      document.getElementById('profile-garden-level').textContent = `${stage.lvl} (${stage.name})`;
+      document.getElementById('profile-style-text').textContent = appState.styleLabel;
+      document.getElementById('profile-mood-text').textContent = appState.moodLabel;
+    }
+
+    function resetAllAppData() {
+      if (confirm('Apakah kamu ingin mereset seluruh data ke pengaturan awal?')) {
+        localStorage.removeItem('teman_belajar_state');
+        appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        saveState();
+        renderAll();
+        showToast('Data Direset', 'Aplikasi telah kembali ke status awal.');
+      }
+    }
+
+    // Daily Quote Shuffler
+    function shuffleDailyQuote() {
+      const idx = Math.floor(Math.random() * DAILY_QUOTES.length);
+      document.getElementById('daily-quote').textContent = `"${DAILY_QUOTES[idx].quote}"`;
+      document.getElementById('daily-quote-author').textContent = `— ${DAILY_QUOTES[idx].author}`;
+    }
+
+    // Toast Utility
+    let toastTimer = null;
+    function showToast(title, msg) {
+      const toast = document.getElementById('app-toast');
+      document.getElementById('toast-title').textContent = title;
+      document.getElementById('toast-msg').textContent = msg;
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+
+    // Confetti Effect
+    function triggerConfetti() {
+      try {
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.7 },
+          colors: ['#4ca05f', '#818e74', '#fbbf24', '#38bdf8']
+        });
+      } catch (e) {
+        // Fallback silently if confetti script not ready
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+      nextFlashcard(); // load first card
+
+      // If user is opening for the very first time, invite to check-in
+      if (!localStorage.getItem('teman_belajar_state')) {
+        setTimeout(() => {
+          openCheckinModal();
+        }, 600);
+      }
+    });
+  </script>
+</body>
+</html>
