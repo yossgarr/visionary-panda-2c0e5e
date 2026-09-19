@@ -302,7 +302,7 @@
               <div id="adaptive-note" class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-3">
                 <i class="fa-solid fa-lightbulb text-amber-600 text-base mt-0.5"></i>
                 <div id="adaptive-note-text">
-                  Karena kamu sedang bersemangat, yuk pelajari konsep organ pernapasan sekaligus latihan 5 soal pemahaman untuk memupuk pohon belajarmu!
+                  Karena kamu sedang bersemangat, yuk pelajari materi hari ini untuk memupuk pohon belajarmu!
                 </div>
               </div>
 
@@ -361,7 +361,7 @@
                 <button onclick="openMateriDetailFromCurrentRec()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm shadow-soft transition flex items-center justify-center gap-2">
                   <i class="fa-solid fa-book-open"></i> Pelajari Materi Sekarang
                 </button>
-                <button onclick="startQuickQuizFromCurrentRec()" class="w-full py-2.5 bg-white hover:bg-brand-50 text-brand-700 border border-brand-200 font-semibold rounded-xl text-xs transition">
+                <button id="rec-btn-quiz" onclick="startQuickQuizFromCurrentRec()" class="w-full py-2.5 bg-white hover:bg-brand-50 text-brand-700 border border-brand-200 font-semibold rounded-xl text-xs transition">
                   <i class="fa-solid fa-bolt mr-1"></i> Coba Soal Pemahaman Saja
                 </button>
               </div>
@@ -1195,27 +1195,27 @@
         <!-- 1. Ringkasan Materi -->
         <div class="space-y-2">
           <h4 class="font-bold text-brand-900 text-sm flex items-center gap-2">
-            <span>📖</span> Ringkasan Materi Esensial
+            <span>📖</span> Isi Materi
           </h4>
           <div id="modal-materi-summary" class="p-4 rounded-2xl bg-brand-50/50 border border-brand-100 text-gray-700 leading-relaxed space-y-2">
             <!-- Content -->
           </div>
         </div>
 
-        <!-- 2. Ilustrasi Visual / Diagram -->
-        <div class="space-y-2">
+        <!-- 2. Rumus / Poin Kunci -->
+        <div id="modal-section-visual" class="space-y-2">
           <h4 class="font-bold text-brand-900 text-sm flex items-center gap-2">
-            <span>🖼️</span> Ilustrasi Visual Konsep
+            <span>🖼️</span> Rumus & Poin Kunci
           </h4>
           <div id="modal-materi-visual" class="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 text-center font-mono text-xs text-brand-900">
             <!-- Visual diagram -->
           </div>
         </div>
 
-        <!-- 3. Contoh Sederhana & Aplikatif -->
-        <div class="space-y-2">
+        <!-- 3. Contoh -->
+        <div id="modal-section-example" class="space-y-2">
           <h4 class="font-bold text-brand-900 text-sm flex items-center gap-2">
-            <span>💡</span> Contoh Nyata Sehari-hari
+            <span>💡</span> Contoh
           </h4>
           <div id="modal-materi-example" class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-950 text-xs sm:text-sm leading-relaxed">
             <!-- Example -->
@@ -1223,7 +1223,7 @@
         </div>
 
         <!-- 4. Action to 5 Soal Pemahaman -->
-        <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
+        <div id="modal-quiz-row" class="pt-4 border-t border-gray-100 flex items-center justify-between">
           <span class="text-xs text-gray-500">Siap menguji pemahaman?</span>
           <button id="modal-btn-start-quiz" onclick="startQuizFromModal()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-soft transition flex items-center gap-2">
             <i class="fa-solid fa-brain"></i> Kerjakan 5 Soal Pemahaman (+EXP)
@@ -1244,690 +1244,348 @@
 
   <script>
     /* ==============================================================
-       DATABASE MATERI KURIKULUM MERDEKA LENGKAP (KELAS 7, 8, 9)
+       DATABASE MATERI KURIKULUM MERDEKA (KELAS 7, 8, 9)
        5 Mapel: Matematika, IPA, B. Inggris, B. Indonesia, IPS
        ============================================================== */
+    const SUBJECT_META = {
+      ipa: { name: 'IPA', icon: '🔬' },
+      ips: { name: 'IPS', icon: '🌏' },
+      indonesia: { name: 'Bahasa Indonesia', icon: '📖' },
+      inggris: { name: 'Bahasa Inggris', icon: '🇬🇧' },
+      matematika: { name: 'Matematika', icon: '➗' }
+    };
+
+    // Helper: buat item materi. paras = paragraf isi, visual = rumus/poin ringkas (opsional), example = contoh (opsional)
+    function materi(grade, subject, no, title, paras, visual, example) {
+      const meta = SUBJECT_META[subject];
+      const bullets = paras
+        .map(p => p.replace(/<[^>]+>/g, '').split(/(?<=\.)\s/)[0])
+        .slice(0, 3);
+      return {
+        id: `k${grade}-${subject}-${no}`,
+        grade, subject,
+        subjectName: meta.name,
+        subjectIcon: meta.icon,
+        title,
+        estTime: '5 Menit',
+        paras,
+        summary: paras.join(' '),
+        visual: visual || '',
+        example: example || '',
+        bullets,
+        questions: []
+      };
+    }
+
     const CURRICULUM_DATA = [
-      // KELAS 7
-      {
-        id: 'k7-mtk-1',
-        grade: 7,
-        subject: 'matematika',
-        subjectName: 'Matematika',
-        subjectIcon: '➗',
-        title: 'Bilangan Bulat & Pecahan',
-        estTime: '12 Menit',
-        summary: 'Bilangan bulat mencakup bilangan bulat negatif, nol, dan bilangan positif. Pada garis bilangan, bilangan di sebelah kanan selalu bernilai lebih besar. Operasi perkalian dua bilangan bertanda sama menghasilkan bilangan positif (+), sedangkan bertanda beda menghasilkan negatif (-).',
-        visual: '[ -3 ] ── [ -2 ] ── [ -1 ] ── [ 0 ] ── [ +1 ] ── [ +2 ] ── [ +3 ]\n← Semakin Kecil                      Semakin Besar →',
-        example: 'Suhu di puncak gunung pada malam hari adalah -2°C. Siang hari suhu naik sebesar 8°C. Maka suhunya menjadi: -2 + 8 = 6°C.',
-        bullets: ['Pengurutan bilangan pada garis bilangan.', 'Sifat komutatif, asosiatif, dan distributif.', 'Aplikasi suhu dan perhitungan utang-piutang.'],
-        questions: [
-          {
-            q: "Berapakah hasil dari (-12) + 7 - (-5)?",
-            options: ["0", "-10", "-14", "10"],
-            correct: 0,
-            expl: "(-12) + 7 = -5. Lalu -5 - (-5) = -5 + 5 = 0."
-          },
-          {
-            q: "Hasil dari (-4) × (-6) ÷ 3 adalah...",
-            options: ["-8", "8", "-12", "12"],
-            correct: 1,
-            expl: "(-4) × (-6) = +24. 24 ÷ 3 = 8."
-          },
-          {
-            q: "Pecahan 3/4 senilai dengan persentase...",
-            options: ["50%", "70%", "75%", "80%"],
-            correct: 2,
-            expl: "3/4 × 100% = 75%."
-          },
-          {
-            q: "Suhu awal kulkas -5°C, dimatikan dan suhunya naik 12°C. Berapa suhu sekarang?",
-            options: ["7°C", "-17°C", "17°C", "-7°C"],
-            correct: 0,
-            expl: "-5 + 12 = 7°C."
-          },
-          {
-            q: "Manakah pernyataan yang benar?",
-            options: ["-8 > -3", "-15 > -2", "-4 < 1", "-1 > 0"],
-            correct: 2,
-            expl: "Semua bilangan negatif lebih kecil daripada bilangan positif: -4 < 1."
-          }
-        ]
-      },
-      {
-        id: 'k7-ipa-1',
-        grade: 7,
-        subject: 'ipa',
-        subjectName: 'IPA',
-        subjectIcon: '🔬',
-        title: 'Hakikat Sains & Metode Ilmiah',
-        estTime: '10 Menit',
-        summary: 'Sains adalah ilmu pengetahuan sistematis tentang alam semesta berdasarkan pengamatan dan eksperimen. Metode ilmiah melibatkan 5 langkah: Merumuskan masalah, hipotesis, eksperimen, analisis data, dan kesimpulan.',
-        visual: '💡 Masalah ➔ ❓ Hipotesis ➔ 🧪 Eksperimen ➔ 📊 Analisis ➔ 🎯 Kesimpulan',
-        example: 'Kamu ingin tahu apakah tanaman cabai tumbuh lebih cepat jika disiram air cucian beras. Kamu melakukan percobaan dengan dua pot selama 7 hari.',
-        bullets: ['Pengenalan alat-alat laboratorium & simbol keselamatan.', 'Variabel bebas, terikat, dan kontrol.', 'Pengukuran besaran pokok dan turunan.'],
-        questions: [
-          {
-            q: "Langkah pertama dalam melakukan penyelidikan ilmiah adalah...",
-            options: ["Menarik kesimpulan", "Melakukan eksperimen", "Merumuskan masalah/pertanyaan", "Menulis laporan"],
-            correct: 2,
-            expl: "Penyelidikan ilmiah selalu bermula dari rasa ingin tahu yang dirumuskan dalam masalah."
-          },
-          {
-            q: "Dugaan sementara yang masih harus diuji kebenarannya disebut...",
-            options: ["Teori", "Hipotesis", "Hukum alam", "Variabel"],
-            correct: 1,
-            expl: "Hipotesis adalah jawaban sementara yang diuji lewat eksperimen."
-          },
-          {
-            q: "Satuan Internasional (SI) untuk besaran suhu adalah...",
-            options: ["Celcius", "Fahrenheit", "Kelvin", "Reamur"],
-            correct: 2,
-            expl: "Satuan SI resmi untuk suhu adalah Kelvin (K)."
-          },
-          {
-            q: "Alat laboratorium yang berfungsi mengukur volume zat cair secara presisi adalah...",
-            options: ["Tabung reaksi", "Gelas ukur", "Cawan petri", "Kaki tiga"],
-            correct: 1,
-            expl: "Gelas ukur digunakan untuk mengukur volume cairan secara akurat."
-          },
-          {
-            q: "Simbol tengkorak pada botol bahan kimia di laboratorium menandakan bahwa zat tersebut...",
-            options: ["Mudah terbakar", "Beracun (Toksik)", "Korosif", "Radioaktif"],
-            correct: 1,
-            expl: "Simbol tengkorak dan tulang bersilang menunjukkan sifat racun berbahaya."
-          }
-        ]
-      },
-      {
-        id: 'k7-inggris-1',
-        grade: 7,
-        subject: 'inggris',
-        subjectName: 'Bahasa Inggris',
-        subjectIcon: '🇬🇧',
-        title: 'Describing People & Things (Descriptive Text)',
-        estTime: '10 Menit',
-        summary: 'Descriptive text aims to describe a specific person, place, or thing. Structure includes: Identification (introducing who/what) and Description (physical appearance, traits, characteristics). Uses Simple Present Tense and Adjectives.',
-        visual: '[ Identification: Meet my cat, Milo ]\n        ↓\n[ Description: Milo has soft white fur, green eyes, and loves fish ]',
-        example: '"My classroom is big and clean. There are twenty desks and a whiteboard on the wall."',
-        bullets: ['Simple Present Tense with to be (is, am, are).', 'Adjectives order (size, color, quality).', 'Writing short description profiles.'],
-        questions: [
-          {
-            q: "What is the primary purpose of a descriptive text?",
-            options: ["To tell a past story", "To describe a particular person, place, or thing", "To instruct how to make food", "To persuade the reader"],
-            correct: 1,
-            expl: "Descriptive text describes the features and details of a specific subject."
-          },
-          {
-            q: "She ... very kind and helpful to her classmates.",
-            options: ["are", "am", "is", "be"],
-            correct: 2,
-            expl: "Subject 'She' takes the verb to be 'is'."
-          },
-          {
-            q: "Which word is an adjective of personality?",
-            options: ["Friendly", "Quickly", "School", "Run"],
-            correct: 0,
-            expl: "'Friendly' is an adjective describing personal attitude."
-          },
-          {
-            q: "The correct sentence with adjectives is...",
-            options: ["She has a hair long black.", "She has long black hair.", "She has black hair long.", "She long hair black has."],
-            correct: 1,
-            expl: "Normal adjective order puts size/length (long) before color (black): 'long black hair'."
-          },
-          {
-            q: "What part of descriptive text introduces the object to be described?",
-            options: ["Resolution", "Orientation", "Identification", "Reorientation"],
-            correct: 2,
-            expl: "Identification introduces the person or object being described."
-          }
-        ]
-      },
-      {
-        id: 'k7-indonesia-1',
-        grade: 7,
-        subject: 'indonesia',
-        subjectName: 'Bahasa Indonesia',
-        subjectIcon: '🇮🇩',
-        title: 'Menjelajah Keindahan Teks Deskripsi',
-        estTime: '10 Menit',
-        summary: 'Teks deskripsi menggambarkan objek atau peristiwa dengan merangsang panca indra (penglihatan, pendengaran, penciuman, perabaan) sehingga pembaca seolah melihat atau merasakan langsung objek tersebut.',
-        visual: '👀 Visual  |  👂 Bunyi  |  👃 Aroma  ➔ Ditulis secara hidup & detail',
-        example: '"Pasir Pantai Kuta terasa hangat dan lembut menyentuh telapak kaki. Deburan ombak putih bergulung teratur diiringi semilir angin laut."',
-        bullets: ['Ciri umum teks deskripsi berdasar panca indra.', 'Struktur: Judul, Identifikasi, Deskripsi Bagian, Simpulan.', 'Penggunaan kata konkret dan kalimat bermajas.'],
-        questions: [
-          {
-            q: "Ciri utama teks deskripsi adalah...",
-            options: ["Memuat langkah-langkah membuat sesuatu", "Menggambarkan objek sejelas-jelasnya melibatkan panca indra", "Menjelaskan sebab akibat fenomena alam", "Menceritakan tokoh fiktif masa lalu"],
-            correct: 1,
-            expl: "Teks deskripsi berfokus melukiskan rincian objek melalui pancaindra."
-          },
-          {
-            q: "'Angin sore membelai lembut dedaunan kelapa.' Kalimat tersebut menggunakan majas...",
-            options: ["Hiperbola", "Metafora", "Personifikasi", "Litotes"],
-            correct: 2,
-            expl: "Personifikasi mengumpamakan benda mati (angin) bersikap seperti manusia (membelai lembut)."
-          },
-          {
-            q: "Bagian teks deskripsi yang berisi pengenalan nama objek dan lokasi disebut...",
-            options: ["Deskripsi bagian", "Identifikasi", "Penutup", "Koda"],
-            correct: 1,
-            expl: "Identifikasi memuat gambaran umum/pengenalan awal objek."
-          },
-          {
-            q: "Kalimat yang melibatkan indra pendengaran adalah...",
-            options: ["Bunga mawar itu merah merekah.", "Suara gemericik air sungai menenangkan jiwa.", "Kue bolu ini sangat lembut di lidah.", "Udara pagi begitu dingin menusuk tulang."],
-            correct: 1,
-            expl: "'Gemericik air' melibatkan alat indra pendengaran (telinga)."
-          },
-          {
-            q: "Kata konkret untuk memperjelas kata 'indah' pada pemandangan adalah...",
-            options: ["Bagus sekali", "Hijau royo-royo berkilau diterpa embun", "Sangat lumayan", "Luar biasa"],
-            correct: 1,
-            expl: "Pilihan tersebut menyajikan deskripsi visual konkret yang dapat dibayangkan."
-          }
-        ]
-      },
-      {
-        id: 'k7-ips-1',
-        grade: 7,
-        subject: 'ips',
-        subjectName: 'IPS',
-        subjectIcon: '🌏',
-        title: 'Keluarga Awal Kehidupan & Kondisi Geografis',
-        estTime: '12 Menit',
-        summary: 'Keluarga merupakan agen sosialisasi primer pertama bagi seorang individu. Sementara letak astronomis Indonesia (6°LU-11°LS dan 95°BT-141°BT) menyebabkan Indonesia beriklim tropis dengan dua musim: kemarau dan hujan.',
-        visual: '👨‍👩‍👧 Keluarga: Sosialisasi Nilai & Karakter\n📍 Letak Astronomis: Iklim Tropis + 3 Zona Waktu (WIB, WITA, WIT)',
-        example: 'Perbedaan waktu antara Jakarta (WIB) dan Bali (WITA) berjarak 1 jam. Saat jam 07.00 di Jakarta, di Denpasar sudah pukul 08.00.',
-        bullets: ['Peran norma dan sosialisasi dalam keluarga.', 'Letak astronomis dan geografis Indonesia.', 'Pembagian 3 zona waktu di Indonesia.'],
-        questions: [
-          {
-            q: "Lembaga sosial pertama dan paling mendasar dalam membentuk kepribadian anak adalah...",
-            options: ["Sekolah", "Keluarga", "Teman bermain", "Media massa"],
-            correct: 1,
-            expl: "Keluarga adalah agen sosialisasi primer terawal dalam kehidupan seseorang."
-          },
-          {
-            q: "Letak astronomis Indonesia berada pada koordinat...",
-            options: ["6°LU - 11°LS dan 95°BT - 141°BT", "10°LU - 15°LS dan 90°BT - 130°BT", "0°LU - 10°LS dan 100°BT - 120°BT", "5°LU - 15°LS dan 95°BT - 145°BT"],
-            correct: 0,
-            expl: "Koordinat astronomis Indonesia adalah 6°LU-11°LS dan 95°BT-141°BT."
-          },
-          {
-            q: "Daerah berikut yang termasuk dalam Zona Waktu Indonesia Tengah (WITA) adalah...",
-            options: ["Jawa Barat", "Sumatera Utara", "Bali dan Sulawesi", "Papua Barat"],
-            correct: 2,
-            expl: "Bali, NTB, NTT, Kalimantan Selatan/Timur/Utara, dan Sulawesi masuk WITA."
-          },
-          {
-            q: "Karena terletak di garis khatulistiwa, Indonesia memiliki iklim...",
-            options: ["Subtropis", "Kering/Gurun", "Tropis", "Kutub"],
-            correct: 2,
-            expl: "Letak ekuator memberikan iklim tropis dengan curah hujan dan sinar matahari melimpah."
-          },
-          {
-            q: "Cerita rakyat dan silsilah keluarga yang diwariskan lisan disebut tradisi...",
-            options: ["Tertulis", "Lisan", "Primer", "Artefak"],
-            correct: 1,
-            expl: "Tradisi lisan diwariskan turun temurun lewat tutur kata."
-          }
-        ]
-      },
+      // ================= KELAS 7 =================
+      // IPA
+      materi(7, 'ipa', 1, 'Pengukuran', [
+        'Pengukuran adalah kegiatan membandingkan suatu besaran dengan satuan tertentu. Dalam IPA, pengukuran digunakan untuk mengetahui nilai suatu besaran secara tepat.',
+        'Besaran pokok yang sering digunakan antara lain panjang, massa, waktu, dan suhu. Alat ukurnya yaitu penggaris atau meteran untuk panjang, neraca untuk massa, stopwatch untuk waktu, dan termometer untuk suhu.'
+      ]),
+      materi(7, 'ipa', 2, 'Zat dan Perubahannya', [
+        'Zat adalah sesuatu yang memiliki massa dan menempati ruang. Zat dapat berupa <strong>padat, cair, dan gas</strong>.',
+        'Perubahan zat dibedakan menjadi perubahan fisika dan perubahan kimia. Perubahan fisika tidak menghasilkan zat baru, seperti es mencair. Perubahan kimia menghasilkan zat baru, seperti kayu yang terbakar.'
+      ]),
+      materi(7, 'ipa', 3, 'Suhu dan Kalor', [
+        'Suhu menunjukkan tingkat panas atau dinginnya suatu benda dan dapat diukur menggunakan termometer.',
+        'Kalor adalah energi yang berpindah karena adanya perbedaan suhu. Kalor dapat menyebabkan perubahan suhu atau perubahan wujud benda, seperti es yang mencair ketika menerima kalor.'
+      ]),
+      materi(7, 'ipa', 4, 'Gerak dan Gaya', [
+        'Gerak adalah perubahan posisi suatu benda terhadap titik acuan. Benda dapat bergerak karena adanya gaya.',
+        'Gaya adalah tarikan atau dorongan yang dapat mengubah gerak, arah, atau bentuk benda. Contohnya adalah mendorong meja dan menarik karet.'
+      ]),
+      materi(7, 'ipa', 5, 'Ekosistem', [
+        'Ekosistem adalah hubungan antara makhluk hidup dengan lingkungan di sekitarnya. Ekosistem terdiri dari komponen <strong>biotik</strong> dan <strong>abiotik</strong>.',
+        'Komponen biotik meliputi manusia, hewan, dan tumbuhan. Komponen abiotik meliputi air, tanah, udara, cahaya, dan suhu. Dalam ekosistem terjadi hubungan seperti rantai makanan.'
+      ]),
 
-      // KELAS 8 (TOPIC UTAMA DARI CONTOH USER)
-      {
-        id: 'k8-ipa-1',
-        grade: 8,
-        subject: 'ipa',
-        subjectName: 'IPA',
-        subjectIcon: '🔬',
-        title: 'Sistem Pernapasan Manusia',
-        estTime: '10 Menit',
-        summary: 'Sistem pernapasan bertugas menukar Oksigen (O₂) dari udara dengan Karbon Dioksida (CO₂) sisa metabolisme. Udara masuk melalui hidung (disaring & dihangatkan), faring, laring, trakea, bronkus, bronkiolus, hingga alveolus tempat difusi kapiler darah terjadi.',
-        visual: 'Hidung ➔ Faring ➔ Laring ➔ Trakea ➔ Bronkus ➔ Alveolus [Difusi O₂ ↔ CO₂]',
-        example: 'Saat kamu berlari cepat, tubuh memerlukan lebih banyak energi, sehingga frekuensi pernapasan otomatis meningkat agar suplai O₂ ke sel-sel otot tercukupi.',
-        bullets: ['Urutan jalurnya udara pernapasan.', 'Mekanisme pernapasan dada vs pernapasan perut (diafragma).', 'Penyakit pernapasan: Asma, TBC, dan Bronkitis.'],
-        questions: [
-          {
-            q: "Tempat terjadinya pertukaran gas O₂ dan CO₂ secara difusi pada paru-paru adalah...",
-            options: ["Bronkus", "Alveolus", "Trakea", "Laring"],
-            correct: 1,
-            expl: "Alveolus adalah kantung udara sangat tipis yang dikelilingi kapiler pembuluh darah."
-          },
-          {
-            q: "Fungsi rambut getar (silia) dan lendir di dalam hidung dan trakea adalah...",
-            options: ["Memproduksi suara nyaring", "Menyaring debu dan kotoran dari udara", "Mendinginkan udara masuk", "Mempercepat pertukaran gas"],
-            correct: 1,
-            expl: "Silia dan lendir menyaring partikel asing sebelum udara masuk ke organ dalam."
-          },
-          {
-            q: "Pada pernapasan perut, saat otot diafragma berkontraksi (mendatar), maka yang terjadi adalah...",
-            options: ["Rongga dada mengecil, udara keluar (ekspirasi)", "Rongga dada membesar, udara masuk (inspirasi)", "Paru-paru mengecil seketika", "Tekanan udara paru-paru meningkat"],
-            correct: 1,
-            expl: "Diafragma mendatar memperbesar volume rongga dada sehingga udara luar terhisap masuk."
-          },
-          {
-            q: "Katup yang mencegah makanan masuk ke saluran pernapasan saat menelan adalah...",
-            options: ["Epiglotis", "Uvula", "Alveoli", "Pita suara"],
-            correct: 0,
-            expl: "Epiglotis otomatis menutup saluran pernapasan saat kita menelan makanan."
-          },
-          {
-            q: "Penyakit penyempitan saluran napas akibat alergi atau debu dinamakan...",
-            options: ["TBC", "Asma", "Anemia", "Pneumonia"],
-            correct: 1,
-            expl: "Asma ditandai dengan sesak napas akibat penyempitan bronkiolus oleh pemicu alergen."
-          }
-        ]
-      },
-      {
-        id: 'k8-mtk-1',
-        grade: 8,
-        subject: 'matematika',
-        subjectName: 'Matematika',
-        subjectIcon: '➗',
-        title: 'Teorema Pythagoras & Segitiga',
-        estTime: '15 Menit',
-        summary: 'Teorema Pythagoras menyatakan bahwa pada segitiga siku-siku, kuadrat panjang sisi miring (hipotenusa) sama dengan jumlah kuadrat panjang kedua sisi siku-sikunya. Rumus utama: c² = a² + b².',
-        visual: '       |\ \n     a |  \ c (hipotenusa)   ===>  c² = a² + b²\n       |___\ \n         b',
-        example: 'Sebuah tangga panjang 5 meter disandarkan di dinding. Jarak kaki tangga ke dinding 3 meter. Tinggi dinding yang dicapai tangga adalah √(5² - 3²) = √(25 - 9) = √16 = 4 meter.',
-        bullets: ['Membuktikan rumus c² = a² + b².', 'Mengenal tripel Pythagoras (3,4,5; 5,12,13; 7,24,25).', 'Menentukan jenis segitiga (lancip, siku-siku, tumpul).'],
-        questions: [
-          {
-            q: "Sebuah segitiga siku-siku memiliki sisi tegak 6 cm dan 8 cm. Berapa panjang sisi miringnya?",
-            options: ["10 cm", "12 cm", "14 cm", "9 cm"],
-            correct: 0,
-            expl: "c = √(6² + 8²) = √(36 + 64) = √100 = 10 cm."
-          },
-          {
-            q: "Manakah kelompok bilangan di bawah ini yang merupakan Tripel Pythagoras?",
-            options: ["4, 5, 6", "5, 12, 13", "7, 10, 12", "6, 8, 12"],
-            correct: 1,
-            expl: "5² + 12² = 25 + 144 = 169 = 13²."
-          },
-          {
-            q: "Jika c² > a² + b² pada sebuah segitiga dengan c sisi terpanjang, maka segitiga tersebut adalah...",
-            options: ["Segitiga Siku-siku", "Segitiga Lancip", "Segitiga Tumpul", "Segitiga Sama Sisi"],
-            correct: 2,
-            expl: "Jika kuadrat sisi terpanjang lebih besar dari jumlah kuadrat lainnya, segitiganya tumpul."
-          },
-          {
-            q: "Sisi miring sebuah segitiga adalah 25 cm, sisi alas 24 cm. Tinggi segitiga adalah...",
-            options: ["7 cm", "10 cm", "12 cm", "15 cm"],
-            correct: 0,
-            expl: "t = √(25² - 24²) = √(625 - 576) = √49 = 7 cm."
-          },
-          {
-            q: "Sebuah kapal berlayar 12 km ke arah utara, lalu berbelok 9 km ke arah timur. Jarak terdekat kapal dari posisi awal adalah...",
-            options: ["15 km", "21 km", "18 km", "16 km"],
-            correct: 0,
-            expl: "Jarak = √(12² + 9²) = √(144 + 81) = √225 = 15 km."
-          }
-        ]
-      },
-      {
-        id: 'k8-inggris-1',
-        grade: 8,
-        subject: 'inggris',
-        subjectName: 'Bahasa Inggris',
-        subjectIcon: '🇬🇧',
-        title: 'Recount Text (My Unforgettable Experience)',
-        estTime: '12 Menit',
-        summary: 'Recount text retells events or experiences that happened in the past in chronological order. Generic Structure: Orientation (setting the scene), Events (series of events), and Reorientation (personal comment). Uses Simple Past Tense (V2).',
-        visual: '[ Orientation: Who, When, Where ] ➔ [ Events: First, Next, Finally ] ➔ [ Reorientation: Reflection ]',
-        example: '"Last Sunday, my family and I went to the beach. We built sandcastles and ate fresh coconuts. It was a tiring but memorable day."',
-        bullets: ['Using Past Tense verbs (went, bought, studied, felt).', 'Time connectors: yesterday, after that, then, finally.', 'Constructing personal dairy and travel entries.'],
-        questions: [
-          {
-            q: "Which tense is predominantly used in a Recount Text?",
-            options: ["Simple Present Tense", "Simple Past Tense", "Future Tense", "Present Continuous"],
-            correct: 1,
-            expl: "Recount text talks about completed events in the past, thus using Simple Past Tense."
-          },
-          {
-            q: "What is the past form (V2) of the verb 'buy'?",
-            options: ["Buyed", "Bought", "Buying", "Buys"],
-            correct: 1,
-            expl: "The irregular past form of 'buy' is 'bought'."
-          },
-          {
-            q: "'Last holiday, we visited Borobudur Temple.' In recount text, this sentence belongs to...",
-            options: ["Reorientation", "Orientation", "Complication", "Resolution"],
-            correct: 1,
-            expl: "Orientation introduces the setting of time, place, and participants."
-          },
-          {
-            q: "Choose the correct sentence in Simple Past Tense:",
-            options: ["She write a letter yesterday.", "She wrote a letter yesterday.", "She is writing a letter yesterday.", "She writes a letter yesterday."],
-            correct: 1,
-            expl: "'Wrote' is the correct past tense for write with past time signal 'yesterday'."
-          },
-          {
-            q: "Which time conjunction shows chronological sequence in events?",
-            options: ["Because", "Although", "After that", "Unless"],
-            correct: 2,
-            expl: "'After that' sequences one action after another."
-          }
-        ]
-      },
-      {
-        id: 'k8-indonesia-1',
-        grade: 8,
-        subject: 'indonesia',
-        subjectName: 'Bahasa Indonesia',
-        subjectIcon: '🇮🇩',
-        title: 'Teks Eksplanasi Ilmiah & Fenomena Alam',
-        estTime: '12 Menit',
-        summary: 'Teks eksplanasi menjelaskan proses "mengapa" dan "bagaimana" terjadinya fenomena alam, sosial, ilmu pengetahuan, atau budaya. Menggunakan konjungsi kausalitas (sebab-akibat) dan kronologis.',
-        visual: 'Identifikasi Fenomena ➔ Proses Sebab-Akibat (Kausalitas) ➔ Ulasan / Simpulan',
-        example: '"Hujan terjadi karena air laut mengalami penguapan (evaporasi) oleh panas matahari, membentuk awan (kondensasi), hingga jatuh sebagai presipitasi."',
-        bullets: ['Struktur: Pernyataan umum, Rangkaian kejadian, Interpretasi.', 'Konjungsi sebab-akibat: karena, sebab, sehingga, akibatnya.', 'Membedakan fakta objektif dengan opini penulis.'],
-        questions: [
-          {
-            q: "Inti bahasan dalam teks eksplanasi adalah...",
-            options: ["Langkah membuat kerajinan", "Proses terjadinya suatu fenomena secara kausalitas", "Kisah fantasi seorang pahlawan", "Bujukan membeli produk"],
-            correct: 1,
-            expl: "Eksplanasi berfokus pada hubungan sebab-akibat timbulnya fenomena."
-          },
-          {
-            q: "Konjungsi yang menyatakan hubungan sebab-akibat adalah...",
-            options: ["Kemudian dan lalu", "Oleh karena itu dan sehingga", "Atau dan jika", "Meskipun dan walaupun"],
-            correct: 1,
-            expl: "'Oleh karena itu' dan 'sehingga' menghubungkan penyebab dengan akibatnya."
-          },
-          {
-            q: "Bagian akhir dari teks eksplanasi yang berisi intisari atau tanggapan disebut...",
-            options: ["Pernyataan umum", "Deretan penjelas", "Interpretasi / Ulasan", "Abstraksi"],
-            correct: 2,
-            expl: "Interpretasi adalah bagian simpulan akhir dari pemaparan fenomena."
-          },
-          {
-            q: "Fenomena berikut yang cocok diangkat menjadi teks eksplanasi ilmiah adalah...",
-            options: ["Tips memenangkan lomba lari", "Proses terjadinya pelangi setelah hujan", "Cerita si Kancil dan Buaya", "Resep membuat nasi goreng"],
-            correct: 1,
-            expl: "Pelangi adalah fenomena optik alam yang dapat dijelaskan secara ilmiah."
-          },
-          {
-            q: "Ciri kebahasaan yang menonjol pada teks eksplanasi adalah penggunaan kata kerja...",
-            options: ["Imperatif (perintah)", "Material dan relasional", "Konotatif puitis", "Emotif kemarahan"],
-            correct: 1,
-            expl: "Teks eksplanasi banyak memakai verba material dan relasional (menyebabkan, menghasilkan)."
-          }
-        ]
-      },
-      {
-        id: 'k8-ips-1',
-        grade: 8,
-        subject: 'ips',
-        subjectName: 'IPS',
-        subjectIcon: '🌏',
-        title: 'Keragaman Budaya & Aktivitas Ekonomi',
-        estTime: '10 Menit',
-        summary: 'Keanekaragaman budaya bangsa Indonesia dipengaruhi oleh letak geografis kepulauan dan jalur perdagangan maritim dunia. Aktivitas ekonomi masyarakat terbagi menjadi produksi, distribusi, dan konsumsi.',
-        visual: '🏭 Produksi (Membuat) ➔ 🚚 Distribusi (Menyalurkan) ➔ 🛒 Konsumsi (Memakai)',
-        example: 'Petani menanam padi di sawah (Produksi), beras diangkut truk ke pasar kota (Distribusi), dan keluarga memasak nasi untuk makan siang (Konsumsi).',
-        bullets: ['Faktor pembentuk keragaman suku & budaya di Nusantara.', 'Peran pelaku ekonomi: RTK, RTP, Pemerintah, Luar Negeri.', 'Pemanfaatan sumber daya kelautan secara berkelanjutan.'],
-        questions: [
-          {
-            q: "Kegiatan menyalurkan barang dari produsen ke tangan konsumen disebut...",
-            options: ["Produksi", "Konsumsi", "Distribusi", "Investasi"],
-            correct: 2,
-            expl: "Distribusi bertugas menyampaikan hasil produksi ke pembeli."
-          },
-          {
-            q: "Faktor geografis utama yang menyebabkan keragaman suku bangsa di Indonesia adalah...",
-            options: ["Bentuk wilayah kepulauan", "Banyaknya gedung bertingkat", "Iklim dingin pegunungan", "Sedikitnya sungai"],
-            correct: 0,
-            expl: "Isolasi alami antar pulau menciptakan variasi adat, bahasa, dan kebiasaan yang unik."
-          },
-          {
-            q: "Pihak yang berperan sebagai penyedia faktor produksi (tanah, tenaga kerja, modal) adalah...",
-            options: ["Rumah Tangga Konsumen (RTK)", "Rumah Tangga Produsen (RTP)", "Pemerintah", "Eksportir"],
-            correct: 0,
-            expl: "RTK menyediakan tenaga kerja dan tanah untuk digunakan produsen."
-          },
-          {
-            q: "Sikap yang tepat dalam menghadapi keragaman budaya sesuai semboyan Bhinneka Tunggal Ika adalah...",
-            options: ["Menganggap budaya sendiri paling hebat", "Toleransi dan saling menghargai", "Menghindari pergaulan lintas suku", "Menolak mempelajari budaya daerah lain"],
-            correct: 1,
-            expl: "Toleransi adalah kunci persatuan di tengah keberagaman suku bangsa."
-          },
-          {
-            q: "Contoh kegiatan konsumsi dalam kehidupan siswa sehari-hari adalah...",
-            options: ["Membeli pensil di koperasi untuk menulis", "Menjual kue buatan ibu di sekolah", "Membuat kerajinan tangan dari bambu", "Mengantar barang pesanan teman"],
-            correct: 0,
-            expl: "Membeli pensil untuk langsung dipakai menulis adalah kegiatan konsumsi."
-          }
-        ]
-      },
+      // IPS
+      materi(7, 'ips', 1, 'Letak dan Kondisi Geografis Indonesia', [
+        'Indonesia merupakan negara kepulauan yang terletak di antara Benua Asia dan Australia serta Samudra Hindia dan Pasifik.',
+        'Letak geografis tersebut memengaruhi iklim, kehidupan masyarakat, kegiatan ekonomi, dan keragaman budaya Indonesia.'
+      ]),
+      materi(7, 'ips', 2, 'Interaksi Sosial', [
+        'Interaksi sosial adalah hubungan timbal balik antara individu dengan individu, individu dengan kelompok, atau kelompok dengan kelompok.',
+        'Interaksi sosial dapat terjadi apabila terdapat <strong>kontak sosial dan komunikasi</strong>. Contohnya adalah kegiatan berdiskusi dan bekerja sama.'
+      ]),
+      materi(7, 'ips', 3, 'Kebutuhan dan Kelangkaan', [
+        'Kebutuhan adalah sesuatu yang diperlukan manusia untuk mempertahankan kehidupan. Kebutuhan manusia meliputi kebutuhan primer, sekunder, dan tersier.',
+        'Kelangkaan terjadi ketika kebutuhan manusia lebih banyak daripada sumber daya yang tersedia. Oleh karena itu, manusia harus menentukan pilihan dan menggunakan sumber daya secara bijak.'
+      ]),
+      materi(7, 'ips', 4, 'Kegiatan Ekonomi', [
+        'Kegiatan ekonomi terdiri atas <strong>produksi, distribusi, dan konsumsi</strong>.',
+        'Produksi adalah kegiatan menghasilkan barang atau jasa. Distribusi adalah kegiatan menyalurkan barang atau jasa. Konsumsi adalah kegiatan menggunakan barang atau jasa untuk memenuhi kebutuhan.'
+      ]),
+      materi(7, 'ips', 5, 'Keragaman Sosial dan Budaya', [
+        'Indonesia memiliki keragaman suku, bahasa, agama, kesenian, pakaian adat, dan tradisi.',
+        'Keragaman tersebut merupakan kekayaan bangsa yang perlu dihargai. Sikap saling menghormati dan toleransi dapat membantu menjaga persatuan.'
+      ]),
 
-      // KELAS 9
-      {
-        id: 'k9-mtk-1',
-        grade: 9,
-        subject: 'matematika',
-        subjectName: 'Matematika',
-        subjectIcon: '➗',
-        title: 'Persamaan & Fungsi Kuadrat',
-        estTime: '15 Menit',
-        summary: 'Bentuk umum persamaan kuadrat adalah ax² + bx + c = 0 dengan a ≠ 0. Nilai x (akar-akar persamaan) dapat dicari dengan memfaktorkan, melengkapkan kuadrat sempurna, atau menggunakan rumus kuadratis abc: x = (-b ± √(b² - 4ac)) / 2a.',
-        visual: 'ax² + bx + c = 0  ➔  Diskriminan (D) = b² - 4ac\nKurva parabola tersenyum jika a > 0, cemberut jika a < 0',
-        example: 'Tinggi roket air setelah t detik dirumuskan h(t) = 20t - 5t². Waktu untuk mencapai tinggi maksimum adalah t = -b / (2a) = -20 / (2 × -5) = 2 detik.',
-        bullets: ['Menentukan akar lewat pemfaktoran.', 'Menghitung nilai Diskriminan (D).', 'Karakteristik kurva parabola fungsi kuadrat.'],
-        questions: [
-          {
-            q: "Akar-akar dari persamaan kuadrat x² - 5x + 6 = 0 adalah...",
-            options: ["x = 2 atau x = 3", "x = -2 atau x = -3", "x = 1 atau x = 6", "x = -1 atau x = -6"],
-            correct: 0,
-            expl: "(x - 2)(x - 3) = 0, sehingga x = 2 atau x = 3."
-          },
-          {
-            q: "Berapa nilai diskriminan dari persamaan x² + 4x + 4 = 0?",
-            options: ["0", "4", "16", "-8"],
-            correct: 0,
-            expl: "D = b² - 4ac = 4² - 4(1)(4) = 16 - 16 = 0."
-          },
-          {
-            q: "Jika nilai D = 0, maka grafik fungsi kuadrat akan...",
-            options: ["Memotong sumbu X di dua titik", "Menyinggung sumbu X di satu titik", "Tidak menyentuh sumbu X sama sekali", "Berbentuk garis lurus"],
-            correct: 1,
-            expl: "D = 0 menandakan memiliki 2 akar kembar (menyinggung di satu titik)."
-          },
-          {
-            q: "Sumbu simetri dari grafik fungsi f(x) = x² - 6x + 8 adalah...",
-            options: ["x = 3", "x = -3", "x = 6", "x = 4"],
-            correct: 0,
-            expl: "x = -b / (2a) = -(-6) / (2 × 1) = 6 / 2 = 3."
-          },
-          {
-            q: "Arah keterbukaan grafik f(x) = -2x² + 4x + 1 adalah...",
-            options: ["Terbuka ke atas", "Terbuka ke bawah", "Mendatar", "Melingkar"],
-            correct: 1,
-            expl: "Karena koefisien a = -2 (negatif), maka parabola terbuka ke bawah."
-          }
-        ]
-      },
-      {
-        id: 'k9-ipa-1',
-        grade: 9,
-        subject: 'ipa',
-        subjectName: 'IPA',
-        subjectIcon: '🔬',
-        title: 'Listrik Statis & Dinamis dalam Kehidupan',
-        estTime: '15 Menit',
-        summary: 'Listrik timbul karena adanya muatan listrik (proton positif dan elektron negatif). Hukum Coulomb menyatakan bahwa gaya tarik atau tolak antara dua muatan sebanding dengan perkalian kedua muatan dan berbanding terbalik dengan kuadrat jaraknya. Pada listrik dinamis, arus listrik I = V / R (Hukum Ohm).',
-        visual: 'Hukum Coulomb: F = k × (q₁ × q₂) / r²\nHukum Ohm: V = I × R (Tegangan = Arus × Hambatan)',
-        example: 'Penggaris plastik yang digosokkan ke rambut kering akan bermuatan negatif karena menerima elektron, sehingga mampu menarik sobekan kertas kecil.',
-        bullets: ['Gaya Coulomb antar muatan listrik.', 'Rangkaian seri dan paralel resistor.', 'Pemanfaatan listrik pada sistem saraf dan hewan penghasil listrik.'],
-        questions: [
-          {
-            q: "Dua muatan sejenis (sama-sama positif) bila didekatkan akan...",
-            options: ["Tarik-menarik", "Tolak-menolak", "Diam tidak berinteraksi", "Menghasilkan magnet"],
-            correct: 1,
-            expl: "Muatan sejenis tolak-menolak, muatan berbeda jenis tarik-menarik."
-          },
-          {
-            q: "Sebuah hambatan 10 Ohm dihubungkan dengan sumber tegangan 20 Volt. Berapa arus listrik yang mengalir?",
-            options: ["0.5 A", "2 A", "200 A", "10 A"],
-            correct: 1,
-            expl: "I = V / R = 20 / 10 = 2 Ampere."
-          },
-          {
-            q: "Kelebihan rangkaian paralel yang digunakan pada instalasi listrik rumah adalah...",
-            options: ["Jika satu lampu mati, lampu lain tetap menyala", "Kabel yang dibutuhkan sangat sedikit", "Arus di semua cabang selalu sama persis", "Tegangannya terbagi rata"],
-            correct: 0,
-            expl: "Rangkaian paralel memiliki cabang mandiri sehingga tidak memadamkan lampu lainnya."
-          },
-          {
-            q: "Partikel atom yang dapat berpindah saat benda digosok adalah...",
-            options: ["Proton", "Neutron", "Elektron", "Nukleus"],
-            correct: 2,
-            expl: "Elektron berada di kulit atom terluar sehingga mudah berpindah."
-          },
-          {
-            q: "Hewan yang memiliki organ khusus elektrosit untuk menghasilkan kejutan listrik berdaya tinggi adalah...",
-            options: ["Belut listrik", "Lumba-lumba", "Gajah", "Burung merpati"],
-            correct: 0,
-            expl: "Belut listrik dapat menghasilkan tegangan ratusan volt untuk melumpuhkan mangsa."
-          }
-        ]
-      },
-      {
-        id: 'k9-inggris-1',
-        grade: 9,
-        subject: 'inggris',
-        subjectName: 'Bahasa Inggris',
-        subjectIcon: '🇬🇧',
-        title: 'Narrative Text & Traditional Folktales',
-        estTime: '12 Menit',
-        summary: 'Narrative text entertains readers with imaginative or folktale stories. Generic Structure: Orientation (introduction of characters and setting), Complication (conflict begins and peaks), Resolution (problems resolved), and Moral Value (coda).',
-        visual: 'Orientation ➔ Complication (Climax ⚡) ➔ Resolution ➔ Moral Lesson',
-        example: 'In the legend of Malin Kundang, Malin denied his poor mother after becoming rich, and was cursed into a stone. Lesson: Always respect your parents.',
-        bullets: ['Direct vs Indirect Speech in narrative dialogue.', 'Adverbs of time: Once upon a time, Long ago, One day.', 'Identifying moral values and character traits.'],
-        questions: [
-          {
-            q: "What is the climax in a narrative story?",
-            options: ["The introduction of the setting", "The peak of the main problem/conflict", "The happy ending", "The description of items"],
-            correct: 1,
-            expl: "The climax in the complication is the highest and most thrilling point of tension."
-          },
-          {
-            q: "'Once upon a time, there lived a kind girl named Cinderella.' This part is the...",
-            options: ["Resolution", "Orientation", "Reorientation", "Evaluation"],
-            correct: 1,
-            expl: "It introduces time, character, and background setting (Orientation)."
-          },
-          {
-            q: "The main purpose of a narrative text is to...",
-            options: ["Amuse or entertain the readers with a story", "Report factual scientific data", "Persuade people to vote", "Give instructions step by step"],
-            correct: 0,
-            expl: "Narrative stories aim to entertain while offering moral lessons."
-          },
-          {
-            q: "Which word often signals a past folktale beginning?",
-            options: ["Tomorrow morning", "Right now", "Once upon a time", "In the next century"],
-            correct: 2,
-            expl: "'Once upon a time' is a classic opening for fables and legends."
-          },
-          {
-            q: "The lesson that readers take away from a narrative story is called...",
-            options: ["Plot twist", "Moral value / Coda", "Setting", "Complication"],
-            correct: 1,
-            expl: "Moral value is the wisdom or positive message taught by the tale."
-          }
-        ]
-      },
-      {
-        id: 'k9-indonesia-1',
-        grade: 9,
-        subject: 'indonesia',
-        subjectName: 'Bahasa Indonesia',
-        subjectIcon: '🇮🇩',
-        title: 'Menyampaikan Gagasan Lewat Pidato Persuasif',
-        estTime: '12 Menit',
-        summary: 'Pidato persuasif bertujuan meyakinkan pendengar untuk melakukan atau menyetujui suatu tindakan atau pandangan. Menggunakan etika, emosi, dan logika secara seimbang.',
-        visual: 'Etika (Kredibilitas) + Emosi (Sentuhan Hati) + Logika (Fakta Data) ➔ Meyakinkan Audiens',
-        example: '"Marilah kita kurangi penggunaan plastik sekali pakai di kantin sekolah kita mulai hari ini, demi menjaga laut dan bumi yang kita cintai!"',
-        bullets: ['Struktur: Pembukaan, Isi Pidato, Penutup.', 'Kalimat persuasif, ajakan, dan kata emotif.', 'Penggunaan kata tugas dan sinonim untuk keindahan pidato.'],
-        questions: [
-          {
-            q: "Tujuan utama dari pidato persuasif adalah...",
-            options: ["Menghibur penonton dengan lelucon", "Mengajak atau meyakinkan pendengar agar sepakat dan bertindak", "Menceritakan masa kecil pembicara", "Menjelaskan cara memasak makanan"],
-            correct: 1,
-            expl: "Pidato persuasif berusaha memengaruhi keyakinan dan sikap audiens."
-          },
-          {
-            q: "Kata berikut yang termasuk kata ajakan persuasif adalah...",
-            options: ["Mungkin", "Marilah dan ayo", "Kemarin", "Kapan"],
-            correct: 1,
-            expl: "'Marilah' dan 'ayo' adalah contoh kata ajakan langsung."
-          },
-          {
-            q: "Bagian pembukaan pidato persuasif yang santun umumnya berisi...",
-            options: ["Salam pembuka, ucapan syukur, dan penghormatan kepada hadirin", "Daftar belanja pembicara", "Argumen keras tanpa salam", "Kesimpulan langsung"],
-            correct: 0,
-            expl: "Etika pidato diawali salam, rasa syukur, dan sapaan hormat."
-          },
-          {
-            q: "Pendekatan persuasif yang menggunakan data fakta dan angka ilmiah disebut pendekatan...",
-            options: ["Emosi", "Logika (Nalar)", "Etika", "Mitos"],
-            correct: 1,
-            expl: "Logika mengandalkan fakta objektif dan data yang dapat dibuktikan."
-          },
-          {
-            q: "Kalimat penutup pidato persuasif yang baik adalah...",
-            options: ["Sekian dan tidak usah banyak tanya.", "Demikian yang dapat saya sampaikan, mohon maaf atas kekhilafan dan terima kasih.", "Saya rasa pidato saya paling hebat hari ini.", "Cukup sudah sampai sini saja."],
-            correct: 1,
-            expl: "Penutup yang baik memuat ringkasan santun, permohonan maaf, dan terima kasih."
-          }
-        ]
-      },
-      {
-        id: 'k9-ips-1',
-        grade: 9,
-        subject: 'ips',
-        subjectName: 'IPS',
-        subjectIcon: '🌏',
-        title: 'Globalisasi & Perubahan Sosial Budaya',
-        estTime: '12 Menit',
-        summary: 'Globalisasi adalah proses integrasi internasional yang terjadi karena pertukaran pandangan dunia, produk, pemikiran, dan aspek-aspek kebudayaan lainnya, didorong oleh kemajuan teknologi komunikasi dan transportasi.',
-        visual: 'Kemajuan IPTEK ➔ Batas Negara Memudar ➔ Pertukaran Budaya, Ekonomi & Informasi Global',
-        example: 'Kamu bisa menonton pertandingan sepak bola di belahan benua lain secara live streaming atau memesan barang dari luar negeri melalui smartphone.',
-        bullets: ['Bentuk globalisasi: Ekonomi, Komunikasi, Iptek, Budaya.', 'Dampak positif: Kemudahan informasi, efisiensi kerja.', 'Upaya melestarikan jati diri kearifan lokal di era modern.'],
-        questions: [
-          {
-            q: "Faktor pendorong utama terjadinya arus globalisasi di abad ke-21 adalah...",
-            options: ["Perkembangan pesat teknologi informasi dan transportasi", "Penurunan jumlah penduduk dunia", "Tertutupnya perdagangan internasional", "Hilangnya sistem pendidikan"],
-            correct: 0,
-            expl: "Internet dan transportasi modern mempercepat arus informasi dan perdagangan."
-          },
-          {
-            q: "Dampak positif globalisasi di bidang pendidikan adalah...",
-            options: ["Meningkatnya kecurangan ujian", "Kemudahan mengakses sumber belajar dan jurnal dunia", "Ketergantungan pada media sosial", "Lunturnya bahasa daerah"],
-            correct: 1,
-            expl: "Pelajar dapat mengakses buku dan referensi berkualitas dari mana pun di dunia."
-          },
-          {
-            q: "Sikap bijak menghadapi pengaruh budaya asing yang masuk adalah...",
-            options: ["Meniru semua hal tanpa memilih", "Menutup diri dari segala bentuk teknologi", "Menyaring secara kritis yang sesuai dengan nilai luhur Pancasila", "Meninggalkan seluruh adat tradisi lokal"],
-            correct: 2,
-            expl: "Filtrasi budaya yang cerdas menjaga jati diri dan moral bangsa."
-          },
-          {
-            q: "Kondisi di mana masyarakat mengalami ketertinggalan dalam mengimbangi perubahan teknologi disebut...",
-            options: ["Cultural Shock", "Cultural Lag", "Asimilasi", "Akulturasi"],
-            correct: 1,
-            expl: "Cultural lag (kesenjangan budaya) terjadi saat teknologi maju tapi mentalitas lambat menyesuaikan."
-          },
-          {
-            q: "Contoh globalisasi di bidang ekonomi adalah...",
-            options: ["Pasar bebas dan perdagangan elektronik lintas negara", "Belajar bahasa daerah di sekolah", "Mendengarkan dongeng sebelum tidur", "Upacara bendera hari Senin"],
-            correct: 0,
-            expl: "E-commerce internasional dan pasar bebas adalah ciri khas globalisasi ekonomi."
-          }
-        ]
-      }
+      // Bahasa Indonesia
+      materi(7, 'indonesia', 1, 'Teks Deskripsi', [
+        'Teks deskripsi adalah teks yang menggambarkan suatu objek secara jelas sehingga pembaca seolah-olah dapat melihat atau merasakan objek tersebut.',
+        'Teks deskripsi biasanya menjelaskan ciri-ciri, bentuk, warna, ukuran, suasana, atau keadaan suatu objek.'
+      ]),
+      materi(7, 'indonesia', 2, 'Teks Prosedur', [
+        'Teks prosedur adalah teks yang berisi langkah-langkah untuk melakukan atau membuat sesuatu.',
+        'Struktur umumnya terdiri dari <strong>tujuan, alat dan bahan, serta langkah-langkah</strong>. Bahasa yang digunakan biasanya jelas, singkat, dan menggunakan kata kerja perintah.'
+      ]),
+      materi(7, 'indonesia', 3, 'Teks Narasi', [
+        'Teks narasi adalah teks yang menceritakan suatu rangkaian peristiwa secara berurutan.',
+        'Narasi biasanya memiliki tokoh, latar, alur, dan konflik. Tujuannya dapat berupa menghibur atau menyampaikan pesan kepada pembaca.'
+      ]),
+      materi(7, 'indonesia', 4, 'Teks Berita', [
+        'Teks berita adalah teks yang menyampaikan informasi mengenai suatu peristiwa yang benar-benar terjadi.',
+        'Berita harus memuat informasi penting seperti <strong>apa, siapa, kapan, di mana, mengapa, dan bagaimana (5W+1H)</strong>.'
+      ]),
+      materi(7, 'indonesia', 5, 'Teks Eksplanasi', [
+        'Teks eksplanasi menjelaskan proses terjadinya suatu fenomena, baik fenomena alam maupun sosial.',
+        'Teks ini menjelaskan hubungan sebab-akibat dan proses suatu peristiwa secara logis dan berdasarkan fakta.'
+      ]),
+
+      // Bahasa Inggris
+      materi(7, 'inggris', 1, 'Greetings and Introduction', [
+        'Greetings digunakan untuk menyapa seseorang, sedangkan introduction digunakan untuk memperkenalkan diri.',
+        'Ungkapan yang umum digunakan adalah <strong>Hello, Hi, Good morning, Nice to meet you</strong>, dan <strong>How are you?</strong>'
+      ], '', 'Hello, my name is Rina.<br/>Nice to meet you.'),
+      materi(7, 'inggris', 2, 'Daily Activities', [
+        'Daily activities adalah kegiatan yang dilakukan sehari-hari.'
+      ], '', 'I wake up at five o\'clock.<br/>I go to school at seven o\'clock.<br/>I study in the classroom.'),
+      materi(7, 'inggris', 3, 'Simple Present Tense', [
+        'Simple Present Tense digunakan untuk menyatakan kebiasaan, fakta, atau kegiatan yang dilakukan secara rutin.',
+        'Untuk <strong>he, she, it</strong>, kata kerja biasanya mendapat tambahan <strong>-s/-es</strong>.'
+      ], 'Rumus: Subject + Verb 1', 'I study every day.<br/>She studies every day.'),
+      materi(7, 'inggris', 4, 'Descriptive Text', [
+        'Descriptive text adalah teks yang menggambarkan seseorang, benda, tempat, atau hewan.',
+        'Strukturnya terdiri dari <strong>identification</strong> dan <strong>description</strong>.',
+        'Contoh topik: describing a person, describing a school, atau describing an animal.'
+      ]),
+      materi(7, 'inggris', 5, 'Recount Text', [
+        'Recount text digunakan untuk menceritakan pengalaman atau peristiwa yang telah terjadi.',
+        'Biasanya menggunakan <strong>Simple Past Tense</strong> dan memiliki struktur <strong>orientation, events, dan reorientation</strong>.'
+      ]),
+
+      // Matematika
+      materi(7, 'matematika', 1, 'Bilangan Bulat', [
+        'Bilangan bulat terdiri dari bilangan negatif, nol, dan bilangan positif.',
+        'Bilangan bulat dapat digunakan dalam kehidupan sehari-hari, misalnya untuk menunjukkan suhu, ketinggian, dan keuntungan atau kerugian.'
+      ], '..., -3, -2, -1, 0, 1, 2, 3, ...'),
+      materi(7, 'matematika', 2, 'Pecahan', [
+        'Pecahan adalah bilangan yang dapat ditulis dalam bentuk <strong>a/b</strong>, dengan b tidak sama dengan nol.',
+        'Jenis pecahan antara lain pecahan biasa, campuran, desimal, dan persen.'
+      ], '', '1/2 = 0,5 = 50%'),
+      materi(7, 'matematika', 3, 'Aljabar', [
+        'Aljabar menggunakan huruf atau simbol untuk mewakili suatu bilangan.',
+        'Pada bentuk 3x + 5, <strong>x</strong> disebut variabel, <strong>3</strong> disebut koefisien, dan <strong>5</strong> disebut konstanta.'
+      ], '3x + 5'),
+      materi(7, 'matematika', 4, 'Persamaan Linear', [
+        'Persamaan linear adalah persamaan yang memiliki variabel dengan pangkat tertinggi satu.',
+        'Tujuan penyelesaian persamaan adalah menemukan nilai variabel yang memenuhi persamaan.'
+      ], '', 'x + 5 = 12<br/>x = 7'),
+      materi(7, 'matematika', 5, 'Bangun Datar', [
+        'Bangun datar adalah bentuk dua dimensi yang memiliki panjang dan lebar.',
+        'Contohnya persegi, persegi panjang, segitiga, dan lingkaran. Setiap bangun memiliki rumus luas dan keliling yang berbeda.'
+      ]),
+
+      // ================= KELAS 8 =================
+      // IPA
+      materi(8, 'ipa', 1, 'Sistem Pencernaan', [
+        'Sistem pencernaan berfungsi mengubah makanan menjadi zat yang dapat diserap dan digunakan tubuh.',
+        'Organ utama pencernaan meliputi <strong>mulut, kerongkongan, lambung, usus halus, usus besar, dan anus</strong>.'
+      ], 'Mulut ➔ Kerongkongan ➔ Lambung ➔ Usus Halus ➔ Usus Besar ➔ Anus'),
+      materi(8, 'ipa', 2, 'Sistem Pernapasan', [
+        'Sistem pernapasan berfungsi mengambil oksigen dan mengeluarkan karbon dioksida.',
+        'Organ pernapasan terdiri dari hidung, tenggorokan, trakea, bronkus, dan paru-paru. Pertukaran gas terjadi di alveolus.'
+      ]),
+      materi(8, 'ipa', 3, 'Sistem Peredaran Darah', [
+        'Sistem peredaran darah berfungsi mengedarkan oksigen, zat makanan, dan berbagai zat lain ke seluruh tubuh.',
+        'Sistem ini melibatkan <strong>jantung, darah, dan pembuluh darah</strong>. Peredaran darah manusia terdiri dari peredaran kecil dan peredaran besar.'
+      ]),
+      materi(8, 'ipa', 4, 'Getaran dan Gelombang', [
+        'Getaran adalah gerak bolak-balik secara teratur melalui titik keseimbangan.',
+        'Gelombang adalah getaran yang merambat dan membawa energi. Contohnya gelombang air, gelombang suara, dan gelombang cahaya.'
+      ]),
+      materi(8, 'ipa', 5, 'Tekanan', [
+        'Tekanan adalah besarnya gaya yang bekerja pada setiap satuan luas permukaan.',
+        'Tekanan dapat ditemukan dalam kehidupan sehari-hari, misalnya pada sepatu, pisau, ban kendaraan, dan tekanan air.'
+      ]),
+
+      // IPS
+      materi(8, 'ips', 1, 'Mobilitas Sosial', [
+        'Mobilitas sosial adalah perpindahan posisi atau kedudukan seseorang dalam struktur sosial.',
+        'Mobilitas dapat berupa <strong>vertikal</strong> dan <strong>horizontal</strong>. Contohnya seseorang yang mendapatkan promosi jabatan mengalami mobilitas sosial vertikal naik.'
+      ]),
+      materi(8, 'ips', 2, 'Pluralitas Masyarakat Indonesia', [
+        'Pluralitas berarti adanya keberagaman dalam masyarakat.',
+        'Indonesia memiliki keberagaman suku, agama, bahasa, budaya, dan pekerjaan. Keberagaman tersebut perlu disikapi dengan toleransi dan saling menghargai.'
+      ]),
+      materi(8, 'ips', 3, 'Konflik dan Integrasi Sosial', [
+        'Konflik sosial terjadi ketika terdapat perbedaan kepentingan, nilai, atau pendapat antara individu maupun kelompok.',
+        'Integrasi sosial adalah proses menyatukan berbagai perbedaan dalam masyarakat sehingga tercipta kehidupan yang harmonis.'
+      ]),
+      materi(8, 'ips', 4, 'Kolonialisme dan Imperialisme', [
+        'Kolonialisme merupakan paham yang bertujuan menguasai wilayah lain untuk dijadikan daerah kekuasaan.',
+        'Imperialisme merupakan politik untuk memperluas kekuasaan suatu negara ke wilayah lain. Kedatangan bangsa Barat ke Indonesia berkaitan dengan pencarian rempah-rempah dan kepentingan ekonomi serta politik.'
+      ]),
+      materi(8, 'ips', 5, 'Pergerakan Nasional', [
+        'Pergerakan nasional merupakan perjuangan bangsa Indonesia untuk mencapai kemerdekaan melalui organisasi dan berbagai gerakan.',
+        'Munculnya organisasi seperti Budi Utomo, Sarekat Islam, dan organisasi lainnya menjadi bagian penting dalam perkembangan kesadaran nasional.'
+      ]),
+
+      // Bahasa Indonesia
+      materi(8, 'indonesia', 1, 'Teks Berita', [
+        'Teks berita menyampaikan informasi faktual mengenai suatu peristiwa.',
+        'Berita harus memiliki informasi yang jelas, aktual, dan dapat dipercaya serta menggunakan bahasa yang efektif.'
+      ]),
+      materi(8, 'indonesia', 2, 'Iklan, Slogan, dan Poster', [
+        'Iklan bertujuan memperkenalkan atau menawarkan barang, jasa, maupun gagasan.',
+        'Slogan adalah kalimat singkat yang menarik dan mudah diingat. Poster merupakan media yang memadukan tulisan dan gambar untuk menyampaikan pesan.'
+      ]),
+      materi(8, 'indonesia', 3, 'Teks Eksposisi', [
+        'Teks eksposisi adalah teks yang menjelaskan atau menyampaikan informasi dan pendapat mengenai suatu topik.',
+        'Teks eksposisi biasanya memiliki <strong>tesis, argumentasi, dan penegasan ulang</strong>.'
+      ]),
+      materi(8, 'indonesia', 4, 'Teks Persuasi', [
+        'Teks persuasi bertujuan mengajak atau meyakinkan pembaca agar melakukan sesuatu.',
+        'Untuk memperkuat ajakan, teks persuasi dapat menggunakan fakta, alasan, dan bahasa yang meyakinkan.'
+      ]),
+      materi(8, 'indonesia', 5, 'Teks Ulasan', [
+        'Teks ulasan berisi penilaian atau pembahasan terhadap suatu karya, seperti buku, film, atau drama.',
+        'Ulasan dapat membahas isi, kelebihan, kekurangan, serta memberikan penilaian terhadap karya tersebut.'
+      ]),
+
+      // Bahasa Inggris
+      materi(8, 'inggris', 1, 'Asking and Giving Opinion', [
+        'Digunakan untuk meminta dan memberikan pendapat.'
+      ], '', 'What do you think about this book?<br/>I think it is interesting.'),
+      materi(8, 'inggris', 2, 'Invitation', [
+        'Invitation digunakan untuk mengundang seseorang melakukan suatu kegiatan.',
+        'Ungkapan menerima dan menolak undangan dapat disampaikan dengan sopan.'
+      ], '', 'Would you like to come to my birthday party?'),
+      materi(8, 'inggris', 3, 'Present Continuous Tense', [
+        'Present Continuous digunakan untuk menyatakan kegiatan yang sedang berlangsung.'
+      ], 'Rumus: Subject + am/is/are + Verb-ing', 'I am studying now.<br/>They are playing football.'),
+      materi(8, 'inggris', 4, 'Comparative and Superlative', [
+        'Comparative digunakan untuk membandingkan dua hal.',
+        'Superlative digunakan untuk menunjukkan sesuatu yang paling dibandingkan dengan yang lain.'
+      ], '', 'Rina is taller than Sinta.<br/>Rina is the tallest student in the class.'),
+      materi(8, 'inggris', 5, 'Narrative Text', [
+        'Narrative text adalah teks yang menceritakan sebuah cerita, biasanya berupa cerita rakyat, dongeng, atau fabel.',
+        'Struktur umumnya <strong>orientation, complication, dan resolution</strong>.'
+      ]),
+
+      // Matematika
+      materi(8, 'matematika', 1, 'Pola Bilangan', [
+        'Pola bilangan adalah susunan bilangan yang mengikuti aturan tertentu.',
+        'Pola pada contoh tersebut bertambah 2 pada setiap bilangan.'
+      ], '', '2, 4, 6, 8, 10, ...'),
+      materi(8, 'matematika', 2, 'Relasi dan Fungsi', [
+        'Relasi adalah hubungan antara anggota suatu himpunan dengan anggota himpunan lainnya.',
+        'Fungsi adalah relasi khusus yang memasangkan setiap anggota domain dengan tepat satu anggota kodomain.'
+      ]),
+      materi(8, 'matematika', 3, 'Persamaan Garis Lurus', [
+        'Persamaan garis lurus menggambarkan hubungan antara dua variabel yang membentuk sebuah garis.',
+        '<strong>m</strong> menunjukkan gradien, sedangkan <strong>c</strong> menunjukkan titik potong dengan sumbu-Y.'
+      ], 'Bentuk umum: y = mx + c'),
+      materi(8, 'matematika', 4, 'Teorema Pythagoras', [
+        'Teorema Pythagoras berlaku pada segitiga siku-siku.',
+        'c adalah sisi miring atau sisi terpanjang segitiga.'
+      ], 'a² + b² = c²'),
+
+      // ================= KELAS 9 =================
+      // IPA
+      materi(9, 'ipa', 1, 'Sistem Reproduksi Manusia', [
+        'Sistem reproduksi berfungsi untuk menghasilkan keturunan.',
+        'Pada laki-laki terdapat organ seperti testis, sedangkan pada perempuan terdapat ovarium, tuba falopi, rahim, dan vagina. Sistem reproduksi juga berkaitan dengan perubahan yang terjadi pada masa pubertas.'
+      ]),
+      materi(9, 'ipa', 2, 'Pewarisan Sifat', [
+        'Pewarisan sifat adalah proses penurunan karakteristik dari orang tua kepada keturunannya.',
+        'Sifat diwariskan melalui <strong>gen</strong> yang terdapat pada kromosom. Contohnya adalah warna mata, bentuk rambut, dan golongan darah.'
+      ]),
+      materi(9, 'ipa', 3, 'Listrik', [
+        'Listrik merupakan salah satu bentuk energi yang banyak digunakan dalam kehidupan sehari-hari.',
+        'Arus listrik adalah aliran muatan listrik. Besaran yang berkaitan dengan listrik antara lain tegangan, arus, dan hambatan.'
+      ]),
+      materi(9, 'ipa', 4, 'Kemagnetan', [
+        'Magnet adalah benda yang dapat menarik benda tertentu, terutama benda yang mengandung bahan magnetis seperti besi.',
+        'Magnet memiliki dua kutub, yaitu <strong>kutub utara dan kutub selatan</strong>. Kutub yang sama tolak-menolak, sedangkan kutub berbeda tarik-menarik.'
+      ]),
+
+      // IPS
+      materi(9, 'ips', 1, 'Perubahan Sosial', [
+        'Perubahan sosial adalah perubahan yang terjadi dalam kehidupan masyarakat, baik dalam nilai, norma, pola perilaku, maupun lembaga sosial.',
+        'Perubahan dapat terjadi karena perkembangan teknologi, pendidikan, komunikasi, dan berbagai faktor lainnya.'
+      ]),
+      materi(9, 'ips', 2, 'Globalisasi', [
+        'Globalisasi adalah proses meningkatnya hubungan dan keterhubungan masyarakat di berbagai belahan dunia.',
+        'Globalisasi dapat terlihat melalui perkembangan internet, komunikasi, perdagangan, transportasi, serta pertukaran budaya.'
+      ]),
+      materi(9, 'ips', 3, 'Perdagangan Internasional', [
+        'Perdagangan internasional adalah kegiatan jual beli barang atau jasa antara satu negara dengan negara lain.',
+        'Kegiatan ini meliputi <strong>ekspor</strong>, yaitu menjual barang ke luar negeri, dan <strong>impor</strong>, yaitu membeli barang dari luar negeri.'
+      ]),
+      materi(9, 'ips', 4, 'Ekonomi Kreatif', [
+        'Ekonomi kreatif merupakan kegiatan ekonomi yang mengandalkan kreativitas, ide, dan inovasi.',
+        'Contohnya meliputi desain, kuliner, musik, fotografi, aplikasi, kerajinan, dan fesyen.'
+      ]),
+      materi(9, 'ips', 5, 'Kerja Sama Antarnegara', [
+        'Negara-negara melakukan kerja sama untuk memenuhi kebutuhan dan mencapai kepentingan bersama.',
+        'Kerja sama dapat dilakukan dalam bidang ekonomi, pendidikan, sosial, budaya, kesehatan, dan lingkungan.'
+      ]),
+
+      // Bahasa Indonesia
+      materi(9, 'indonesia', 1, 'Teks Pidato', [
+        'Pidato adalah kegiatan menyampaikan gagasan atau informasi secara lisan kepada orang lain.',
+        'Struktur pidato terdiri dari <strong>pembukaan, isi, dan penutup</strong>. Bahasa yang digunakan harus jelas, sopan, dan sesuai dengan tujuan pidato.'
+      ]),
+      materi(9, 'indonesia', 2, 'Teks Diskusi', [
+        'Teks diskusi membahas suatu permasalahan dari berbagai sudut pandang.',
+        'Biasanya terdapat <strong>isu, pendapat yang mendukung, pendapat yang menentang, dan kesimpulan</strong>.'
+      ]),
+      materi(9, 'indonesia', 3, 'Teks Tanggapan', [
+        'Teks tanggapan berisi pendapat atau penilaian terhadap suatu hal.',
+        'Tanggapan sebaiknya disertai alasan dan fakta sehingga pendapat yang disampaikan dapat dipertanggungjawabkan.'
+      ]),
+      materi(9, 'indonesia', 4, 'Cerpen', [
+        'Cerpen adalah cerita fiksi yang relatif singkat dan berfokus pada satu peristiwa atau konflik utama.',
+        'Unsur cerpen meliputi <strong>tema, tokoh, penokohan, alur, latar, sudut pandang, dan amanat</strong>.'
+      ]),
+
+      // Bahasa Inggris
+      materi(9, 'inggris', 1, 'Simple Future Tense', [
+        'Simple Future digunakan untuk menyatakan kegiatan atau kejadian yang akan terjadi di masa depan.'
+      ], 'Rumus: Subject + will + Verb 1', 'I will study tomorrow.'),
+      materi(9, 'inggris', 2, 'Passive Voice', [
+        'Passive voice digunakan ketika fokus kalimat berada pada tindakan atau objek yang dikenai tindakan.',
+        'Pada passive voice, objek pada kalimat aktif menjadi subjek dalam kalimat pasif.'
+      ], '', 'The book is read by the student.'),
+      materi(9, 'inggris', 3, 'Present Perfect Tense', [
+        'Present Perfect digunakan untuk menyatakan kegiatan yang telah terjadi dan memiliki hubungan dengan keadaan sekarang.'
+      ], 'Rumus: Subject + have/has + Verb 3', 'I have finished my homework.'),
+      materi(9, 'inggris', 4, 'Report Text', [
+        'Report text bertujuan memberikan informasi umum mengenai suatu objek, hewan, tumbuhan, atau fenomena.',
+        'Report text biasanya berdasarkan fakta dan menggunakan <strong>Simple Present Tense</strong>.'
+      ]),
+      materi(9, 'inggris', 5, 'Narrative Text', [
+        'Narrative text menceritakan suatu cerita yang memiliki tokoh dan rangkaian peristiwa.',
+        'Strukturnya meliputi <strong>orientation, complication, dan resolution</strong> serta biasanya menggunakan bentuk lampau.'
+      ]),
+
+      // Matematika
+      materi(9, 'matematika', 1, 'Sistem Persamaan Linear Dua Variabel (SPLDV)', [
+        'SPLDV adalah dua persamaan yang memiliki dua variabel dan dicari nilai keduanya secara bersamaan. SPLDV dapat diselesaikan dengan metode <strong>substitusi, eliminasi, atau grafik</strong>.'
+      ], '', '<strong>Contoh soal:</strong> Tentukan nilai x dan y dari x + y = 7 dan x − y = 1.<br/><strong>Jawaban:</strong> Dengan eliminasi, diperoleh <strong>x = 4 dan y = 3</strong>.'),
+      materi(9, 'matematika', 2, 'Kubus dan Balok', [
+        'Kubus dan balok merupakan bangun ruang. Kubus memiliki semua rusuk yang sama panjang, sedangkan balok memiliki panjang, lebar, dan tinggi yang dapat berbeda.'
+      ], 'Volume kubus: V = s³\nVolume balok: V = p × l × t', '<strong>Contoh soal:</strong> Sebuah kubus memiliki panjang rusuk 5 cm. Berapa volumenya?<br/><strong>Jawaban:</strong> V = 5³ = <strong>125 cm³</strong>.'),
+      materi(9, 'matematika', 3, 'Prisma dan Limas', [
+        'Prisma memiliki dua alas yang sama dan sejajar, sedangkan limas memiliki satu alas dan sisi tegak yang bertemu di satu titik puncak.'
+      ], 'Volume prisma = luas alas × tinggi\nVolume limas = ⅓ × luas alas × tinggi', '<strong>Contoh soal:</strong> Sebuah prisma memiliki luas alas 20 cm² dan tinggi 10 cm. Berapa volumenya?<br/><strong>Jawaban:</strong> V = 20 × 10 = <strong>200 cm³</strong>.'),
+      materi(9, 'matematika', 4, 'Lingkaran dan Garis Singgung', [
+        'Lingkaran adalah kumpulan titik yang memiliki jarak sama dari titik pusat. Jarak tersebut disebut jari-jari. Garis singgung adalah garis yang menyentuh lingkaran tepat di satu titik.'
+      ], 'Luas: L = πr²\nKeliling: K = 2πr', '<strong>Contoh soal:</strong> Sebuah lingkaran memiliki jari-jari 7 cm. Berapa luasnya? Gunakan π = 22/7.<br/><strong>Jawaban:</strong> L = 22/7 × 7² = <strong>154 cm²</strong>.')
     ];
 
     /* ==============================================================
@@ -2427,7 +2085,7 @@
       } else if (appState.mood === 'kurang_semangat') {
         adaptiveAdvice = `Tak perlu terburu-buru, pelajari satu contoh sederhana saja untuk membuat pohon belajarmu tetap tersenyum hari ini 🌱`;
       } else {
-        adaptiveAdvice = `Energi belajarmu luar biasa (${appState.moodLabel})! Yuk kuasai konsep ${item.title} secara tuntas dan kerjakan soal pemahamannya.`;
+        adaptiveAdvice = `Energi belajarmu luar biasa (${appState.moodLabel})! Yuk kuasai konsep ${item.title} secara tuntas.`;
       }
 
       document.getElementById('rec-title').textContent = `${item.subjectIcon} ${item.subjectName}: ${item.title}`;
@@ -2450,6 +2108,7 @@
 
       // Save pointer to currently recommended topic
       window.currentRecommendedItem = item;
+      document.getElementById('rec-btn-quiz').classList.toggle('hidden', !item.questions.length);
     }
 
     function openMateriDetailFromCurrentRec() {
@@ -2652,7 +2311,7 @@
             <button onclick='openMateriModalById("${item.id}")' class="flex-1 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-xl text-xs transition text-center">
               📖 Buka Materi
             </button>
-            <button onclick='startQuizRunnerById("${item.id}")' class="px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold rounded-xl text-xs transition" title="Latihan 5 Soal">
+            <button onclick='startQuizRunnerById("${item.id}")' class="${item.questions.length ? '' : 'hidden '}px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold rounded-xl text-xs transition" title="Latihan 5 Soal">
               <i class="fa-solid fa-pen-fancy"></i>
             </button>
           </div>
@@ -2670,9 +2329,14 @@
       window.activeModalItem = item;
       document.getElementById('modal-materi-badge').textContent = `${item.subjectIcon} ${item.subjectName} • KELAS ${item.grade}`;
       document.getElementById('modal-materi-title').textContent = item.title;
-      document.getElementById('modal-materi-summary').innerHTML = `<p>${item.summary}</p>`;
+      document.getElementById('modal-materi-summary').innerHTML = item.paras.map(p => `<p>${p}</p>`).join('');
       document.getElementById('modal-materi-visual').innerHTML = `<pre class="whitespace-pre-wrap font-sans text-xs sm:text-sm text-brand-900">${item.visual}</pre>`;
-      document.getElementById('modal-materi-example').innerHTML = `<p><strong>Contoh Aplikasi:</strong> ${item.example}</p>`;
+      document.getElementById('modal-materi-example').innerHTML = `<p>${item.example}</p>`;
+
+      // Bagian rumus/contoh & tombol soal hanya tampil bila materi punya datanya
+      document.getElementById('modal-section-visual').classList.toggle('hidden', !item.visual);
+      document.getElementById('modal-section-example').classList.toggle('hidden', !item.example);
+      document.getElementById('modal-quiz-row').classList.toggle('hidden', !item.questions.length);
 
       document.getElementById('materi-modal').classList.remove('hidden');
 
@@ -2706,6 +2370,7 @@
     }
 
     function startQuizRunner(item) {
+      if (!item.questions.length) return;
       activeQuizItem = item;
       quizQuestionIndex = 0;
       quizScore = 0;
