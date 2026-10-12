@@ -638,51 +638,62 @@
             <div>
               <span class="text-xs font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">Mode Latihan Terpandu</span>
               <h3 class="text-xl font-bold text-gray-800 mt-1" id="quiz-runner-title">Latihan Soal Pemahaman</h3>
-              <p class="text-xs text-gray-500" id="quiz-runner-subtitle">Pilih jawaban yang paling tepat. Dapatkan pembahasan lengkap & poin tanaman!</p>
+              <p class="text-xs text-gray-500" id="quiz-runner-subtitle">Ketik jawabanmu. Kalau belum tepat, kunci jawaban akan ditampilkan beserta pembahasannya.</p>
             </div>
             <!-- Quiz Progress -->
-            <div class="flex items-center gap-3">
+            <div id="quiz-progress-wrap" class="hidden items-center gap-3">
               <div class="text-right">
                 <span class="text-xs text-gray-400">Pertanyaan</span>
-                <p class="text-sm font-bold text-gray-800" id="quiz-counter">1 dari 5</p>
+                <p class="text-sm font-bold text-gray-800" id="quiz-counter">1 dari 3</p>
               </div>
               <div class="w-28 bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                <div id="quiz-progress-fill" class="bg-sky-500 h-full rounded-full transition-all duration-300" style="width: 20%;"></div>
+                <div id="quiz-progress-fill" class="bg-sky-500 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
               </div>
             </div>
           </div>
 
-          <!-- Active Question Container -->
-          <div id="quiz-active-box" class="space-y-6">
-            <div class="p-5 rounded-2xl bg-gray-50 border border-gray-200">
-              <p class="text-xs font-bold text-brand-700 uppercase tracking-wider mb-1" id="quiz-question-category">IPA • KELAS 8</p>
-              <h4 class="text-base sm:text-lg font-semibold text-gray-900 leading-snug" id="quiz-question-text">
-                Di manakah tempat terjadinya pertukaran gas oksigen (O₂) dan karbon dioksida (CO₂) di dalam paru-paru manusia?
-              </h4>
-            </div>
-
-            <!-- Answer Options -->
-            <div class="space-y-3" id="quiz-options-container">
+          <!-- Pemilih materi (tampil jika belum ada latihan yang berjalan) -->
+          <div id="quiz-picker-box" class="space-y-5">
+            <p class="text-sm text-gray-600">Pilih materi Kelas <span id="quiz-picker-grade" class="font-bold text-brand-700">8</span> yang ingin kamu latih. Tiap materi berisi 3 soal isian singkat.</p>
+            <div id="quiz-picker-list" class="space-y-5">
               <!-- Injected by JS -->
             </div>
+          </div>
 
-            <!-- Explanation Box (Appears after answer) -->
+          <!-- Active Question Container -->
+          <div id="quiz-active-box" class="hidden space-y-6">
+            <div class="p-5 rounded-2xl bg-gray-50 border border-gray-200">
+              <p class="text-xs font-bold text-brand-700 uppercase tracking-wider mb-1" id="quiz-question-category">IPA • KELAS 8</p>
+              <h4 class="text-base sm:text-lg font-semibold text-gray-900 leading-snug" id="quiz-question-text"></h4>
+            </div>
+
+            <!-- Jawaban diketik -->
+            <form id="quiz-answer-form" class="flex flex-col sm:flex-row gap-3" autocomplete="off">
+              <input id="quiz-answer-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Ketik jawabanmu di sini..."
+                class="flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-sky-400 focus:outline-none text-sm font-medium text-gray-800" />
+              <button id="quiz-check-btn" type="submit" class="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-2xl text-sm transition">
+                Periksa Jawaban
+              </button>
+            </form>
+
+            <!-- Hasil jawaban + kunci jawaban (muncul setelah menjawab) -->
             <div id="quiz-explanation-box" class="hidden p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-sm space-y-2">
               <div class="flex items-center gap-2 font-bold text-emerald-800">
-                <i class="fa-solid fa-circle-check text-lg"></i>
+                <i id="quiz-result-icon" class="fa-solid fa-circle-check text-lg"></i>
                 <span id="quiz-result-title">Jawaban Benar!</span>
               </div>
-              <p id="quiz-explanation-text" class="text-xs sm:text-sm text-emerald-900/90 leading-relaxed">
-                Pembahasan: Pertukaran oksigen dan karbondioksida terjadi di alveolus melalui proses difusi kapiler darah.
+              <p id="quiz-key-box" class="hidden text-sm font-semibold">
+                Kunci jawaban: <span id="quiz-key-text" class="px-2 py-0.5 rounded-lg bg-white border border-amber-300"></span>
               </p>
+              <p id="quiz-explanation-text" class="text-xs sm:text-sm leading-relaxed"></p>
             </div>
 
             <!-- Quiz Navigation Bottom -->
             <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-              <button onclick="resetCurrentQuiz()" class="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 transition">
+              <button type="button" onclick="resetCurrentQuiz()" class="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 transition">
                 <i class="fa-solid fa-rotate-left mr-1"></i> Ulangi Kuis
               </button>
-              <button id="quiz-next-btn" onclick="nextQuestion()" disabled class="px-6 py-2.5 bg-gray-300 text-gray-600 cursor-not-allowed font-bold rounded-xl text-sm transition">
+              <button type="button" id="quiz-next-btn" onclick="nextQuestion()" disabled class="px-6 py-2.5 bg-gray-300 text-gray-600 cursor-not-allowed font-bold rounded-xl text-sm transition">
                 Soal Berikutnya &rarr;
               </button>
             </div>
@@ -694,15 +705,16 @@
               🏆
             </div>
             <h3 class="text-2xl font-black text-gray-800">Latihan Selesai!</h3>
-            <p class="text-sm text-gray-600 max-w-md mx-auto" id="quiz-summary-score">
-              Kamu berhasil menjawab dengan benar! Pohon belajarmu menerima nutrisi air dan sinar matahari baru.
-            </p>
-            <div class="flex justify-center gap-3 pt-3">
-              <button onclick="switchTab('garden')" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-2xl text-xs sm:text-sm transition">
-                🌱 Lihat Pertumbuhan Kebun
+            <p class="text-sm text-gray-600 max-w-md mx-auto" id="quiz-summary-score"></p>
+            <div class="flex flex-wrap justify-center gap-3 pt-3">
+              <button type="button" onclick="resetCurrentQuiz()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-2xl text-xs sm:text-sm transition">
+                Ulangi Latihan
               </button>
-              <button onclick="switchTab('materi')" class="px-5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold rounded-2xl text-xs sm:text-sm transition">
+              <button type="button" onclick="renderLatihanView()" class="px-5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold rounded-2xl text-xs sm:text-sm transition">
                 Pilih Materi Lain
+              </button>
+              <button type="button" onclick="switchTab('garden')" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-2xl text-xs sm:text-sm transition">
+                🌱 Lihat Kebun
               </button>
             </div>
           </div>
@@ -718,7 +730,7 @@
             <div>
               <span class="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">Flash Quiz Mode</span>
               <h3 class="text-xl font-bold text-gray-800 mt-1">Kuis Cepat 3 Menit</h3>
-              <p class="text-xs text-gray-500">Uji ingatan konsep kilat untuk menyegarkan pikiran tanpa stres.</p>
+              <p class="text-xs text-gray-500">10 soal isian dalam 3 menit. Pilih satu mata pelajaran lalu ketik jawabanmu.</p>
             </div>
             <div class="bg-amber-50 border border-amber-200 text-amber-800 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-2">
               <i class="fa-solid fa-stopwatch"></i>
@@ -726,53 +738,88 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Flash Card Mode -->
-            <div class="p-6 rounded-3xl bg-gradient-to-br from-brand-50 to-mint/30 border border-brand-200 flex flex-col justify-between min-h-[260px]">
-              <div class="flex justify-between items-center text-xs text-brand-800 font-bold">
-                <span>KARTU KONSEP KILAT</span>
-                <span id="flashcard-badge">Matematika</span>
+          <!-- Layar 1: pilih mapel -->
+          <div id="quick-home" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 class="font-bold text-gray-800 text-sm mb-3">Pilih Mata Pelajaran • Kelas <span id="quick-home-grade">8</span></h4>
+              <div id="quick-subject-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Injected by JS -->
               </div>
-              <div class="text-center py-6">
-                <h4 id="flashcard-question" class="text-lg font-bold text-brand-900 leading-snug">
-                  "Rumus Teorema Pythagoras untuk segitiga siku-siku dengan sisi miring c adalah..."
+            </div>
+            <div class="space-y-4">
+              <div class="p-5 rounded-3xl bg-white border border-gray-200">
+                <h4 class="font-bold text-gray-800 text-sm mb-2 flex items-center gap-2">
+                  <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> Aturan Main
                 </h4>
-                <p id="flashcard-answer" class="hidden mt-4 p-3 bg-white rounded-xl shadow-xs font-bold text-emerald-700 text-base">
-                  c² = a² + b²
-                </p>
+                <ul class="text-xs text-gray-600 space-y-2">
+                  <li class="flex items-start gap-2"><i class="fa-solid fa-check text-brand-500 mt-0.5"></i> 10 soal acak, waktu total 3 menit.</li>
+                  <li class="flex items-start gap-2"><i class="fa-solid fa-check text-brand-500 mt-0.5"></i> Ketik jawabanmu. Kalau salah, kunci jawaban langsung ditampilkan.</li>
+                  <li class="flex items-start gap-2"><i class="fa-solid fa-check text-brand-500 mt-0.5"></i> Selesai kuis memberi EXP, +1 Ember Air 💧, dan +1 Sinar Mentari ☀️.</li>
+                </ul>
               </div>
-              <div class="flex gap-2">
-                <button id="flashcard-btn-reveal" onclick="toggleFlashcardAnswer()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-xs transition">
-                  <i class="fa-regular fa-eye mr-1"></i> Buka Kunci Jawaban
-                </button>
-                <button onclick="nextFlashcard()" class="w-full py-2.5 bg-white hover:bg-brand-50 text-brand-700 border border-brand-200 font-bold rounded-xl text-xs transition">
-                  Kartu Berikutnya &rarr;
-                </button>
+              <div class="p-5 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-900">
+                <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">Skor Terbaik Hari Ini</p>
+                <h3 class="text-2xl font-black text-emerald-950 mt-0.5" id="quick-best-score">Belum ada</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Layar 2: sesi kuis -->
+          <div id="quick-session" class="hidden space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <span id="quick-session-badge" class="text-xs font-bold text-brand-700 bg-brand-50 px-3 py-1 rounded-full border border-brand-200 whitespace-nowrap">IPA • Kelas 8</span>
+              <div class="flex items-center gap-3">
+                <p class="text-sm font-bold text-gray-800 whitespace-nowrap" id="quick-counter">Soal 1 dari 10</p>
+                <div class="w-24 bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                  <div id="quick-progress-fill" class="bg-amber-500 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+                </div>
               </div>
             </div>
 
-            <!-- Fast Challenge Stats & Perks -->
-            <div class="space-y-4">
-              <div class="p-5 rounded-3xl bg-white border border-gray-200 shadow-2xs">
-                <h4 class="font-bold text-gray-800 text-sm mb-2 flex items-center gap-2">
-                  <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> Manfaat Kuis Cepat
-                </h4>
-                <ul class="text-xs text-gray-600 space-y-2">
-                  <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Melatih memori jangka panjang (Active Recall).</li>
-                  <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Sangat cocok saat mood sedang lelah atau pusing.</li>
-                  <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Tiap 3 kartu selesai memberi +1 Sinar Mentari ☀️.</li>
-                </ul>
-              </div>
+            <div class="p-5 rounded-2xl bg-gray-50 border border-gray-200">
+              <h4 class="text-base sm:text-lg font-semibold text-gray-900 leading-snug" id="quick-question-text"></h4>
+            </div>
 
-              <div class="p-5 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between">
-                <div>
-                  <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">Skor Kuis Hari Ini</p>
-                  <h3 class="text-2xl font-black text-emerald-950 mt-0.5" id="flash-card-score">4 Kartu Diingat</h3>
-                </div>
-                <button onclick="claimQuickWaterReward()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-xs transition">
-                  Klaim Air 💧
-                </button>
+            <form id="quick-answer-form" class="flex flex-col sm:flex-row gap-3" autocomplete="off">
+              <input id="quick-answer-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Ketik jawabanmu di sini..."
+                class="flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-400 focus:outline-none text-sm font-medium text-gray-800" />
+              <button id="quick-check-btn" type="submit" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl text-sm transition">
+                Jawab
+              </button>
+            </form>
+
+            <div id="quick-feedback-box" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-sm space-y-1">
+              <div class="flex items-center gap-2 font-bold">
+                <i id="quick-feedback-icon" class="fa-solid fa-circle-check text-lg"></i>
+                <span id="quick-feedback-title">Benar!</span>
               </div>
+              <p id="quick-key-box" class="hidden font-semibold">
+                Kunci jawaban: <span id="quick-key-text" class="px-2 py-0.5 rounded-lg bg-white border border-amber-300"></span>
+              </p>
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+              <button type="button" onclick="stopQuickQuiz()" class="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 transition">
+                <i class="fa-solid fa-xmark mr-1"></i> Hentikan Kuis
+              </button>
+              <button type="button" id="quick-next-btn" onclick="nextQuickQuestion()" disabled class="px-6 py-2.5 bg-gray-300 text-gray-600 cursor-not-allowed font-bold rounded-xl text-sm transition">
+                Soal Berikutnya &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- Layar 3: hasil -->
+          <div id="quick-result" class="hidden text-center py-8 space-y-4">
+            <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-4xl mx-auto shadow-soft" id="quick-result-icon">⚡</div>
+            <h3 class="text-2xl font-black text-gray-800" id="quick-result-title">Kuis Selesai!</h3>
+            <p class="text-sm text-gray-600 max-w-md mx-auto" id="quick-result-text"></p>
+            <div class="flex flex-wrap justify-center gap-3 pt-3">
+              <button type="button" onclick="retryQuickQuiz()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl text-xs sm:text-sm transition">
+                Ulangi Kuis
+              </button>
+              <button type="button" onclick="renderQuickQuizHome()" class="px-5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold rounded-2xl text-xs sm:text-sm transition">
+                Pilih Mapel Lain
+              </button>
             </div>
           </div>
         </div>
@@ -1222,11 +1269,11 @@
           </div>
         </div>
 
-        <!-- 4. Action to 5 Soal Pemahaman -->
+        <!-- 4. Action to 3 Soal Pemahaman -->
         <div id="modal-quiz-row" class="pt-4 border-t border-gray-100 flex items-center justify-between">
           <span class="text-xs text-gray-500">Siap menguji pemahaman?</span>
           <button id="modal-btn-start-quiz" onclick="startQuizFromModal()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-soft transition flex items-center gap-2">
-            <i class="fa-solid fa-brain"></i> Kerjakan 5 Soal Pemahaman (+EXP)
+            <i class="fa-solid fa-brain"></i> Kerjakan 3 Soal Pemahaman (+EXP)
           </button>
         </div>
       </div>
@@ -1242,6 +1289,8 @@
     </div>
   </div>
 
+  <script src="soal-latihan.js"></script>
+  <script src="soal-kuis.js"></script>
   <script>
     /* ==============================================================
        DATABASE MATERI KURIKULUM MERDEKA (KELAS 7, 8, 9)
@@ -1259,10 +1308,16 @@
     function materi(grade, subject, no, title, paras, visual, example) {
       const meta = SUBJECT_META[subject];
       const bullets = paras
-        .map(p => p.replace(/<[^>]+>/g, '').split(/(?<=\.)\s/)[0])
+        .map(p => {
+          const text = p.replace(/<[^>]+>/g, '');
+          const firstSentence = text.match(/^.*?\.(?=\s|$)/); // kalimat pertama (tanpa lookbehind agar jalan di Safari lama)
+          return firstSentence ? firstSentence[0] : text;
+        })
         .slice(0, 3);
+      const id = `k${grade}-${subject}-${no}`;
+      const soal = (window.LATIHAN_SOAL && window.LATIHAN_SOAL[id]) || [];
       return {
-        id: `k${grade}-${subject}-${no}`,
+        id,
         grade, subject,
         subjectName: meta.name,
         subjectIcon: meta.icon,
@@ -1273,7 +1328,7 @@
         visual: visual || '',
         example: example || '',
         bullets,
-        questions: []
+        questions: soal.map(s => ({ q: s[0], a: s[1], expl: s[2] }))
       };
     }
 
@@ -1616,7 +1671,7 @@
       activityLog: [],
       tasks: [
         { id: 1, title: 'Baca Rangkuman Alveolus Sistem Pernapasan', deadline: 'Hari Ini, 16.00', done: false, rewarded: false },
-        { id: 2, title: 'Latihan 5 Soal Pythagoras Matematika', deadline: 'Besok, 14.00', done: false, rewarded: false },
+        { id: 2, title: 'Latihan 3 Soal Pythagoras Matematika', deadline: 'Besok, 14.00', done: false, rewarded: false },
         { id: 3, title: 'Catat Kosakata Baru Bahasa Inggris Recount', deadline: 'Lusa, 19.00', done: false, rewarded: false }
       ],
       schedules: [
@@ -1626,13 +1681,29 @@
         { day: 'Kamis', items: ['➗ MTK Latihan (09.00)', '🔬 Eksperimen IPA (11.00)'] },
         { day: 'Jumat', items: ['📖 Membaca Mandiri (08.00)', '✨ Evaluasi Mingguan (14.00)'] }
       ],
-      flashcardsSeen: 0
+      quickQuizBest: { date: null, score: 0 }
     };
 
-    let appState = JSON.parse(localStorage.getItem('teman_belajar_state')) || JSON.parse(JSON.stringify(DEFAULT_STATE));
+    // Baca state dengan aman: data rusak / localStorage diblokir tidak boleh mematikan aplikasi
+    function loadState() {
+      const fresh = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      try {
+        const saved = JSON.parse(localStorage.getItem('teman_belajar_state'));
+        if (saved && typeof saved === 'object') return Object.assign(fresh, saved);
+      } catch (e) {
+        // data korup atau storage tidak tersedia -> pakai state awal
+      }
+      return fresh;
+    }
+
+    let appState = loadState();
 
     function saveState() {
-      localStorage.setItem('teman_belajar_state', JSON.stringify(appState));
+      try {
+        localStorage.setItem('teman_belajar_state', JSON.stringify(appState));
+      } catch (e) {
+        // storage penuh / diblokir: aplikasi tetap jalan tanpa penyimpanan
+      }
     }
 
     function todayDateStr() {
@@ -1697,35 +1768,28 @@
       }
     }
 
-    // Flashcard deck for Kuis Cepat
-    const FLASHCARDS = [
-      {
-        subj: 'Matematika',
-        q: '"Rumus Teorema Pythagoras untuk segitiga siku-siku dengan sisi miring c adalah..."',
-        a: 'c² = a² + b²'
-      },
-      {
-        subj: 'IPA',
-        q: '"Kantung tipis di paru-paru tempat bertukarnya oksigen dan karbondioksida dinamakan..."',
-        a: 'Alveolus'
-      },
-      {
-        subj: 'Bahasa Inggris',
-        q: '"Bentuk Past Tense (V2) dari kata kerja \'eat\' adalah..."',
-        a: 'Ate'
-      },
-      {
-        subj: 'IPS',
-        q: '"Tiga kegiatan utama perekonomian masyarakat adalah..."',
-        a: 'Produksi, Distribusi, dan Konsumsi'
-      },
-      {
-        subj: 'Bahasa Indonesia',
-        q: '"Majas yang mengumpamakan benda mati berperilaku seperti manusia hidup disebut..."',
-        a: 'Personifikasi'
-      }
-    ];
-    let currentFlashcardIndex = 0;
+    // Pencocokan jawaban isian: tidak peka huruf besar/kecil, spasi, tanda baca, dan koma desimal
+    function normalizeAnswer(text) {
+      return String(text == null ? '' : text)
+        .toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/(\d),(\d)/g, '$1.$2')
+        .replace(/([a-z])-([a-z])/g, '$1 $2')
+        .replace(/[^a-z0-9.\/+\-\s]/g, ' ')
+        .replace(/\.+(?=\s|$)/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function checkAnswer(input, acceptedList) {
+      const given = normalizeAnswer(input);
+      if (!given) return false;
+      return acceptedList.some(acc => normalizeAnswer(acc) === given);
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
 
     // Inspirational quotes
     const DAILY_QUOTES = [
@@ -1749,6 +1813,10 @@
       // Show selected view
       const target = document.getElementById('view-' + tabId);
       if (target) target.classList.remove('hidden');
+
+      // Kuis Cepat dihentikan (timer mati) jika siswa pindah tab; Latihan menampilkan pemilih materi bila belum ada sesi
+      if (tabId !== 'kuis' && quickQuiz) renderQuickQuizHome();
+      if (tabId === 'latihan') renderLatihanView();
 
       // Update sidebar active styling
       document.querySelectorAll('.nav-item').forEach(btn => {
@@ -2005,6 +2073,7 @@
     function renderAll() {
       const stage = getPlantStageInfo(appState.plantExp);
       appState.plantLevel = stage.lvl;
+      if (!quickQuiz) renderQuickQuizHome(); // jangan menimpa sesi / hasil Kuis Cepat yang sedang tampil
 
       // 1. Sidebar mini badge
       const moodEmojis = { semangat: '😊', biasa: '😐', ngantuk: '😴', pusing: '😵', kurang_semangat: '😔' };
@@ -2025,7 +2094,7 @@
 
       // 3. Beranda Hero
       document.getElementById('hero-tagline-text').textContent = `Kurikulum Merdeka • Kelas ${appState.grade} MTs/SMP`;
-      document.getElementById('hero-mood-name').textContent = appState.moodLabel.replace(/^[^\s]+\s/, '');
+      // hero-advice sudah memuat nama mood; jangan akses #hero-mood-name karena elemennya ikut tertimpa innerHTML
       document.getElementById('hero-advice').innerHTML = `Kamu sedang merasa <span class="font-bold underline">${appState.moodLabel}</span>. ${appState.moodNote}`;
       document.getElementById('hero-garden-icon').textContent = stage.icon;
       document.getElementById('hero-plant-stage').textContent = stage.name;
@@ -2311,7 +2380,7 @@
             <button onclick='openMateriModalById("${item.id}")' class="flex-1 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-xl text-xs transition text-center">
               📖 Buka Materi
             </button>
-            <button onclick='startQuizRunnerById("${item.id}")' class="${item.questions.length ? '' : 'hidden '}px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold rounded-xl text-xs transition" title="Latihan 5 Soal">
+            <button onclick='startQuizRunnerById("${item.id}")' class="${item.questions.length ? '' : 'hidden '}px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold rounded-xl text-xs transition" title="Latihan 3 Soal">
               <i class="fa-solid fa-pen-fancy"></i>
             </button>
           </div>
@@ -2359,10 +2428,74 @@
       }
     }
 
-    // Latihan Soal Runner
+    // ==============================================================
+    // Latihan Soal Runner (jawaban diketik)
+    // ==============================================================
     let activeQuizItem = null;
     let quizQuestionIndex = 0;
     let quizScore = 0;
+    let quizAnswered = false;
+    let quizInProgress = false;
+
+    function setNextButtonState(btn, enabled, label) {
+      btn.disabled = !enabled;
+      btn.innerHTML = label;
+      btn.className = enabled
+        ? 'px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white cursor-pointer font-bold rounded-xl text-sm shadow-soft transition'
+        : 'px-6 py-2.5 bg-gray-300 text-gray-500 cursor-not-allowed font-bold rounded-xl text-sm transition';
+    }
+
+    // Tampilan awal tab Latihan: pilih materi (kecuali sedang ada latihan berjalan)
+    function renderLatihanView() {
+      const pickerBox = document.getElementById('quiz-picker-box');
+      const activeBox = document.getElementById('quiz-active-box');
+      const completedBox = document.getElementById('quiz-completed-box');
+      const progressWrap = document.getElementById('quiz-progress-wrap');
+
+      if (quizInProgress && activeQuizItem) {
+        pickerBox.classList.add('hidden');
+        completedBox.classList.add('hidden');
+        activeBox.classList.remove('hidden');
+        progressWrap.classList.remove('hidden');
+        progressWrap.classList.add('flex');
+        return;
+      }
+
+      quizInProgress = false;
+      activeBox.classList.add('hidden');
+      completedBox.classList.add('hidden');
+      progressWrap.classList.add('hidden');
+      progressWrap.classList.remove('flex');
+      pickerBox.classList.remove('hidden');
+      document.getElementById('quiz-runner-title').textContent = 'Latihan Soal Pemahaman';
+      document.getElementById('quiz-runner-subtitle').textContent = 'Ketik jawabanmu. Kalau belum tepat, kunci jawaban akan ditampilkan beserta pembahasannya.';
+      document.getElementById('quiz-picker-grade').textContent = appState.grade;
+
+      const list = document.getElementById('quiz-picker-list');
+      list.innerHTML = '';
+      Object.keys(SUBJECT_META).forEach(subject => {
+        const items = CURRICULUM_DATA.filter(m => m.grade === appState.grade && m.subject === subject && m.questions.length);
+        if (!items.length) return;
+        const group = document.createElement('div');
+        group.innerHTML = `<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">${SUBJECT_META[subject].icon} ${SUBJECT_META[subject].name}</h4>`;
+        const grid = document.createElement('div');
+        grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2';
+        items.forEach(item => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'text-left px-4 py-3 rounded-2xl border border-gray-200 hover:border-sky-400 hover:bg-sky-50 transition flex items-center justify-between gap-3';
+          btn.innerHTML = `<span class="text-sm font-semibold text-gray-800"></span><span class="text-[11px] text-sky-700 font-bold whitespace-nowrap">${item.questions.length} soal &rarr;</span>`;
+          btn.firstChild.textContent = item.title;
+          btn.onclick = () => startQuizRunner(item);
+          grid.appendChild(btn);
+        });
+        group.appendChild(grid);
+        list.appendChild(group);
+      });
+      if (!list.children.length) {
+        list.innerHTML = '<p class="text-sm text-gray-500">Belum ada soal latihan untuk kelas ini.</p>';
+      }
+    }
 
     function startQuizRunnerById(id) {
       const item = CURRICULUM_DATA.find(x => x.id === id);
@@ -2370,16 +2503,21 @@
     }
 
     function startQuizRunner(item) {
-      if (!item.questions.length) return;
+      if (!item || !item.questions.length) return;
       activeQuizItem = item;
       quizQuestionIndex = 0;
       quizScore = 0;
+      quizInProgress = true;
       switchTab('latihan');
 
       document.getElementById('quiz-runner-title').textContent = `Latihan: ${item.title}`;
       document.getElementById('quiz-runner-subtitle').textContent = `Mata Pelajaran ${item.subjectName} • Kurikulum Merdeka Kelas ${item.grade}`;
-      document.getElementById('quiz-active-box').classList.remove('hidden');
+      document.getElementById('quiz-picker-box').classList.add('hidden');
       document.getElementById('quiz-completed-box').classList.add('hidden');
+      document.getElementById('quiz-active-box').classList.remove('hidden');
+      const progressWrap = document.getElementById('quiz-progress-wrap');
+      progressWrap.classList.remove('hidden');
+      progressWrap.classList.add('flex');
 
       loadQuizQuestion();
     }
@@ -2388,71 +2526,68 @@
       if (!activeQuizItem) return;
       const qData = activeQuizItem.questions[quizQuestionIndex];
       const total = activeQuizItem.questions.length;
+      quizAnswered = false;
 
       document.getElementById('quiz-counter').textContent = `${quizQuestionIndex + 1} dari ${total}`;
-      const pct = Math.round(((quizQuestionIndex + 1) / total) * 100);
-      document.getElementById('quiz-progress-fill').style.width = `${pct}%`;
-
+      document.getElementById('quiz-progress-fill').style.width = `${Math.round((quizQuestionIndex / total) * 100)}%`;
       document.getElementById('quiz-question-category').textContent = `${activeQuizItem.subjectName} • KELAS ${activeQuizItem.grade}`;
       document.getElementById('quiz-question-text').textContent = qData.q;
 
-      // Hide explanation & disable next
-      const explBox = document.getElementById('quiz-explanation-box');
-      explBox.classList.add('hidden');
-      const nextBtn = document.getElementById('quiz-next-btn');
-      nextBtn.disabled = true;
-      nextBtn.className = 'px-6 py-2.5 bg-gray-300 text-gray-500 cursor-not-allowed font-bold rounded-xl text-sm transition';
+      document.getElementById('quiz-explanation-box').classList.add('hidden');
+      setNextButtonState(document.getElementById('quiz-next-btn'), false, 'Soal Berikutnya &rarr;');
 
-      // Render options
-      const optContainer = document.getElementById('quiz-options-container');
-      optContainer.innerHTML = '';
-
-      qData.options.forEach((optText, idx) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'quiz-opt-btn w-full p-4 rounded-2xl border-2 border-gray-200 hover:border-sky-400 text-left font-medium text-sm text-gray-800 transition flex items-center justify-between';
-        btn.innerHTML = `
-          <span>${String.fromCharCode(65 + idx)}. ${optText}</span>
-          <i class="fa-regular fa-circle text-gray-300"></i>
-        `;
-        btn.onclick = () => selectQuizAnswer(idx, btn);
-        optContainer.appendChild(btn);
-      });
+      const input = document.getElementById('quiz-answer-input');
+      input.value = '';
+      input.disabled = false;
+      input.className = 'flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-sky-400 focus:outline-none text-sm font-medium text-gray-800';
+      document.getElementById('quiz-check-btn').disabled = false;
+      input.focus();
     }
 
-    function selectQuizAnswer(selectedIdx, clickedBtn) {
-      const qData = activeQuizItem.questions[quizQuestionIndex];
-      const buttons = document.querySelectorAll('.quiz-opt-btn');
-      buttons.forEach(b => b.disabled = true);
+    function submitQuizAnswer() {
+      if (!activeQuizItem || quizAnswered) return;
+      const input = document.getElementById('quiz-answer-input');
+      if (!input.value.trim()) {
+        showToast('Isi jawabanmu dulu', 'Ketik jawaban lalu tekan "Periksa Jawaban".');
+        input.focus();
+        return;
+      }
 
-      const isCorrect = (selectedIdx === qData.correct);
+      const qData = activeQuizItem.questions[quizQuestionIndex];
+      const isCorrect = checkAnswer(input.value, qData.a);
+      quizAnswered = true;
+      input.disabled = true;
+      document.getElementById('quiz-check-btn').disabled = true;
+
+      const box = document.getElementById('quiz-explanation-box');
+      const keyBox = document.getElementById('quiz-key-box');
+      const icon = document.getElementById('quiz-result-icon');
       if (isCorrect) {
         quizScore++;
-        clickedBtn.className = 'quiz-opt-btn w-full p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-left font-semibold text-sm text-emerald-900 transition flex items-center justify-between';
-        clickedBtn.querySelector('i').className = 'fa-solid fa-circle-check text-emerald-600 text-base';
-        document.getElementById('quiz-result-title').textContent = 'Hebat! Jawabanmu Benar 🌱';
-        document.getElementById('quiz-explanation-box').className = 'p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-sm space-y-2';
+        input.className = 'flex-1 px-4 py-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-sm font-semibold text-emerald-900';
+        box.className = 'p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-sm space-y-2';
+        icon.className = 'fa-solid fa-circle-check text-lg text-emerald-600';
+        document.getElementById('quiz-result-title').textContent = 'Hebat! Jawabanmu benar 🌱';
+        keyBox.classList.add('hidden');
       } else {
-        clickedBtn.className = 'quiz-opt-btn w-full p-4 rounded-2xl border-2 border-rose-400 bg-rose-50 text-left font-semibold text-sm text-rose-900 transition flex items-center justify-between';
-        clickedBtn.querySelector('i').className = 'fa-solid fa-circle-xmark text-rose-500 text-base';
-        
-        // highlight correct answer
-        buttons[qData.correct].className = 'quiz-opt-btn w-full p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/70 text-left font-semibold text-sm text-emerald-900 transition flex items-center justify-between';
-        
-        document.getElementById('quiz-result-title').textContent = 'Kurang Tepat, Tapi Jangan Khawatir!';
-        document.getElementById('quiz-explanation-box').className = 'p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-sm space-y-2';
+        input.className = 'flex-1 px-4 py-3 rounded-2xl border-2 border-rose-400 bg-rose-50 text-sm font-semibold text-rose-900';
+        box.className = 'p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-sm space-y-2';
+        icon.className = 'fa-solid fa-circle-xmark text-lg text-rose-500';
+        document.getElementById('quiz-result-title').textContent = 'Belum tepat, tapi jangan khawatir!';
+        document.getElementById('quiz-key-text').textContent = qData.a[0];
+        keyBox.classList.remove('hidden');
       }
 
       document.getElementById('quiz-explanation-text').textContent = `Pembahasan: ${qData.expl}`;
-      document.getElementById('quiz-explanation-box').classList.remove('hidden');
+      box.classList.remove('hidden');
 
-      // Enable Next Button
-      const nextBtn = document.getElementById('quiz-next-btn');
-      nextBtn.disabled = false;
-      nextBtn.className = 'px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white cursor-pointer font-bold rounded-xl text-sm shadow-soft transition';
+      const isLast = quizQuestionIndex + 1 >= activeQuizItem.questions.length;
+      setNextButtonState(document.getElementById('quiz-next-btn'), true, isLast ? 'Lihat Hasil &rarr;' : 'Soal Berikutnya &rarr;');
+      document.getElementById('quiz-next-btn').focus();
     }
 
     function nextQuestion() {
+      if (!activeQuizItem || !quizAnswered) return;
       quizQuestionIndex++;
       if (quizQuestionIndex < activeQuizItem.questions.length) {
         loadQuizQuestion();
@@ -2462,23 +2597,26 @@
     }
 
     function finishQuizRunner() {
+      quizInProgress = false;
       document.getElementById('quiz-active-box').classList.add('hidden');
       document.getElementById('quiz-completed-box').classList.remove('hidden');
+      document.getElementById('quiz-progress-fill').style.width = '100%';
 
       // Rewards
+      const total = activeQuizItem.questions.length;
       const earnedExp = quizScore * 10 + 10;
       appState.plantExp += earnedExp;
       appState.water += 2;
       appState.sun += 1;
       appState.quizzesCompleted = (appState.quizzesCompleted || 0) + 1;
-      if (quizScore === activeQuizItem.questions.length) {
+      if (quizScore === total) {
         appState.hasPerfectQuiz = true;
       }
       saveState();
       renderAll();
 
       document.getElementById('quiz-summary-score').innerHTML = `
-        Kamu berhasil menjawab <strong>${quizScore} dari ${activeQuizItem.questions.length} soal</strong> dengan benar!<br/>
+        Kamu berhasil menjawab <strong>${quizScore} dari ${total} soal</strong> dengan benar!<br/>
         Hadiah tanaman: <strong>+${earnedExp} EXP</strong>, <strong>+2 Ember Air 💧</strong>, dan <strong>+1 Sinar Mentari ☀️</strong>!
       `;
 
@@ -2491,43 +2629,245 @@
       }
     }
 
-    // Kuis Cepat Flashcard
-    function toggleFlashcardAnswer() {
-      const el = document.getElementById('flashcard-answer');
-      const btn = document.getElementById('flashcard-btn-reveal');
-      if (el.classList.contains('hidden')) {
-        el.classList.remove('hidden');
-        btn.innerHTML = '<i class="fa-regular fa-eye-slash mr-1"></i> Sembunyikan Jawaban';
-      } else {
-        el.classList.add('hidden');
-        btn.innerHTML = '<i class="fa-regular fa-eye mr-1"></i> Buka Kunci Jawaban';
+    // ==============================================================
+    // Kuis Cepat: per mapel, 10 soal, 3 menit, jawaban diketik
+    // ==============================================================
+    const QUICK_QUIZ_TOTAL = 10;
+    const QUICK_QUIZ_SECONDS = 180;
+    let quickQuiz = null; // { subject, questions, index, score, answered, answeredCount, endAt, timerId }
+
+    function shuffleArray(list) {
+      const arr = list.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+      }
+      return arr;
+    }
+
+    function formatClock(totalSeconds) {
+      const s = Math.max(0, totalSeconds);
+      return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+    }
+
+    function showQuickScreen(name) {
+      ['home', 'session', 'result'].forEach(screen => {
+        document.getElementById('quick-' + screen).classList.toggle('hidden', screen !== name);
+      });
+    }
+
+    function updateQuickTimerDisplay(seconds) {
+      const el = document.getElementById('quick-quiz-timer');
+      el.textContent = formatClock(seconds);
+      el.classList.toggle('text-rose-600', seconds <= 30);
+    }
+
+    function clearQuickTimer() {
+      if (quickQuiz && quickQuiz.timerId) {
+        clearInterval(quickQuiz.timerId);
+        quickQuiz.timerId = null;
       }
     }
 
-    function displayFlashcard() {
-      const card = FLASHCARDS[currentFlashcardIndex];
-      document.getElementById('flashcard-badge').textContent = card.subj;
-      document.getElementById('flashcard-question').textContent = card.q;
-      document.getElementById('flashcard-answer').textContent = card.a;
-      document.getElementById('flashcard-answer').classList.add('hidden');
-      document.getElementById('flashcard-btn-reveal').innerHTML = '<i class="fa-regular fa-eye mr-1"></i> Buka Kunci Jawaban';
-      document.getElementById('flash-card-score').textContent = `${appState.flashcardsSeen} Kartu Diingat`;
+    // Layar pilih mapel
+    function renderQuickQuizHome() {
+      clearQuickTimer();
+      quickQuiz = null;
+      updateQuickTimerDisplay(QUICK_QUIZ_SECONDS);
+      showQuickScreen('home');
+      document.getElementById('quick-home-grade').textContent = appState.grade;
+
+      const best = appState.quickQuizBest;
+      document.getElementById('quick-best-score').textContent =
+        best && best.date === todayDateStr() ? `${best.score} / ${QUICK_QUIZ_TOTAL}` : 'Belum ada';
+
+      const list = document.getElementById('quick-subject-list');
+      list.innerHTML = '';
+      Object.keys(SUBJECT_META).forEach(subject => {
+        const bank = (window.QUICK_QUIZ_BANK && window.QUICK_QUIZ_BANK[subject] && window.QUICK_QUIZ_BANK[subject][appState.grade]) || [];
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.disabled = !bank.length;
+        btn.className = 'p-4 rounded-2xl border-2 border-gray-200 hover:border-amber-400 hover:bg-amber-50 text-left transition disabled:opacity-50 disabled:cursor-not-allowed';
+        btn.innerHTML = `<div class="text-2xl">${SUBJECT_META[subject].icon}</div><div class="text-sm font-bold text-gray-800 mt-1"></div><div class="text-[11px] text-gray-500">10 soal • 3 menit</div>`;
+        btn.children[1].textContent = SUBJECT_META[subject].name;
+        btn.onclick = () => startQuickQuiz(subject);
+        list.appendChild(btn);
+      });
     }
 
-    function nextFlashcard() {
-      currentFlashcardIndex = (currentFlashcardIndex + 1) % FLASHCARDS.length;
-      appState.flashcardsSeen++;
-      displayFlashcard();
-      saveState();
+    function startQuickQuiz(subject) {
+      const bank = (window.QUICK_QUIZ_BANK && window.QUICK_QUIZ_BANK[subject] && window.QUICK_QUIZ_BANK[subject][appState.grade]) || [];
+      if (!bank.length) {
+        showToast('Soal belum tersedia', 'Belum ada soal untuk mapel dan kelas ini.');
+        return;
+      }
+      clearQuickTimer();
+      quickQuiz = {
+        subject,
+        questions: shuffleArray(bank).slice(0, QUICK_QUIZ_TOTAL),
+        index: 0,
+        score: 0,
+        answered: false,
+        answeredCount: 0,
+        endAt: Date.now() + QUICK_QUIZ_SECONDS * 1000,
+        timerId: null
+      };
+
+      showQuickScreen('session');
+      document.getElementById('quick-session-badge').textContent = `${SUBJECT_META[subject].name} • Kelas ${appState.grade}`;
+      updateQuickTimerDisplay(QUICK_QUIZ_SECONDS);
+      quickQuiz.timerId = setInterval(tickQuickTimer, 250);
+      renderQuickQuestion();
     }
 
-    function claimQuickWaterReward() {
-      appState.water += 1;
-      appState.plantExp += 10;
+    function tickQuickTimer() {
+      if (!quickQuiz) return;
+      const remaining = Math.ceil((quickQuiz.endAt - Date.now()) / 1000);
+      updateQuickTimerDisplay(remaining);
+      if (remaining <= 0) finishQuickQuiz(true);
+    }
+
+    function renderQuickQuestion() {
+      const total = quickQuiz.questions.length;
+      const qData = quickQuiz.questions[quickQuiz.index];
+      quickQuiz.answered = false;
+
+      document.getElementById('quick-counter').textContent = `Soal ${quickQuiz.index + 1} dari ${total}`;
+      document.getElementById('quick-progress-fill').style.width = `${Math.round((quickQuiz.index / total) * 100)}%`;
+      document.getElementById('quick-question-text').textContent = qData[0];
+      document.getElementById('quick-feedback-box').classList.add('hidden');
+      setNextButtonState(document.getElementById('quick-next-btn'), false, 'Soal Berikutnya &rarr;');
+
+      const input = document.getElementById('quick-answer-input');
+      input.value = '';
+      input.disabled = false;
+      input.className = 'flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-400 focus:outline-none text-sm font-medium text-gray-800';
+      document.getElementById('quick-check-btn').disabled = false;
+      input.focus();
+    }
+
+    function submitQuickAnswer() {
+      if (!quickQuiz || quickQuiz.answered) return;
+      const input = document.getElementById('quick-answer-input');
+      if (!input.value.trim()) {
+        input.focus();
+        return;
+      }
+
+      const qData = quickQuiz.questions[quickQuiz.index];
+      const isCorrect = checkAnswer(input.value, qData[1]);
+      quickQuiz.answered = true;
+      quickQuiz.answeredCount++;
+      input.disabled = true;
+      document.getElementById('quick-check-btn').disabled = true;
+
+      const box = document.getElementById('quick-feedback-box');
+      const icon = document.getElementById('quick-feedback-icon');
+      const keyBox = document.getElementById('quick-key-box');
+      if (isCorrect) {
+        quickQuiz.score++;
+        input.className = 'flex-1 px-4 py-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-sm font-semibold text-emerald-900';
+        box.className = 'p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-sm space-y-1';
+        icon.className = 'fa-solid fa-circle-check text-lg text-emerald-600';
+        document.getElementById('quick-feedback-title').textContent = 'Benar!';
+        keyBox.classList.add('hidden');
+      } else {
+        input.className = 'flex-1 px-4 py-3 rounded-2xl border-2 border-rose-400 bg-rose-50 text-sm font-semibold text-rose-900';
+        box.className = 'p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-sm space-y-1';
+        icon.className = 'fa-solid fa-circle-xmark text-lg text-rose-500';
+        document.getElementById('quick-feedback-title').textContent = 'Belum tepat';
+        document.getElementById('quick-key-text').textContent = qData[1][0];
+        keyBox.classList.remove('hidden');
+      }
+      box.classList.remove('hidden');
+
+      const isLast = quickQuiz.index + 1 >= quickQuiz.questions.length;
+      const nextBtn = document.getElementById('quick-next-btn');
+      setNextButtonState(nextBtn, true, isLast ? 'Lihat Hasil &rarr;' : 'Soal Berikutnya &rarr;');
+      nextBtn.focus();
+    }
+
+    function nextQuickQuestion() {
+      if (!quickQuiz || !quickQuiz.answered) return;
+      quickQuiz.index++;
+      if (quickQuiz.index < quickQuiz.questions.length) {
+        renderQuickQuestion();
+      } else {
+        finishQuickQuiz(false);
+      }
+    }
+
+    function finishQuickQuiz(timedOut) {
+      if (!quickQuiz) return;
+      clearQuickTimer();
+      const { subject, score, answeredCount } = quickQuiz;
+      const total = quickQuiz.questions.length;
+      showQuickScreen('result');
+
+      let rewardText = 'Belum ada jawaban benar kali ini. Coba lagi, kamu pasti bisa! 💪';
+      if (score > 0) {
+        const earnedExp = score * 5 + 5;
+        appState.plantExp += earnedExp;
+        appState.water += 1;
+        appState.sun += 1;
+        rewardText = `Hadiah tanaman: <strong>+${earnedExp} EXP</strong>, <strong>+1 Ember Air 💧</strong>, dan <strong>+1 Sinar Mentari ☀️</strong>!`;
+      }
+      if (answeredCount > 0) {
+        appState.quizzesCompleted = (appState.quizzesCompleted || 0) + 1;
+      }
+      if (score === total) {
+        appState.hasPerfectQuiz = true;
+      }
+      const best = appState.quickQuizBest;
+      if (!best || best.date !== todayDateStr() || score > best.score) {
+        appState.quickQuizBest = { date: todayDateStr(), score };
+      }
       saveState();
       renderAll();
-      showToast('Klaim Berhasil!', '+1 Ember Air & +10 EXP ditambahkan ke kebunmu! 🌱');
-      triggerConfetti();
+
+      document.getElementById('quick-result-icon').textContent = timedOut ? '⏰' : (score >= 8 ? '🏆' : '⚡');
+      document.getElementById('quick-result-title').textContent = timedOut ? 'Waktu Habis!' : 'Kuis Selesai!';
+      document.getElementById('quick-result-text').innerHTML = `
+        Mapel <strong>${SUBJECT_META[subject].name}</strong>: <strong>${score} dari ${total}</strong> soal benar
+        (${answeredCount} soal terjawab).<br/>${rewardText}
+      `;
+      quickQuizLastSubject = subject;
+      if (score > 0) triggerConfetti();
+    }
+
+    let quickQuizLastSubject = null;
+
+    function retryQuickQuiz() {
+      if (quickQuizLastSubject) startQuickQuiz(quickQuizLastSubject);
+      else renderQuickQuizHome();
+    }
+
+    // Keluar dari kuis cepat (tombol hentikan / pindah tab): timer berhenti, tidak ada hadiah
+    function stopQuickQuiz() {
+      renderQuickQuizHome();
+    }
+
+    function initQuizInputs() {
+      document.getElementById('quiz-answer-form').addEventListener('submit', e => {
+        e.preventDefault();
+        submitQuizAnswer();
+      });
+      document.getElementById('quick-answer-form').addEventListener('submit', e => {
+        e.preventDefault();
+        submitQuickAnswer();
+      });
+      // Enter pada jawaban yang sudah dikoreksi = lanjut ke soal berikutnya
+      document.addEventListener('keydown', e => {
+        if (e.key !== 'Enter' || e.target.tagName === 'BUTTON') return;
+        if (!document.getElementById('view-latihan').classList.contains('hidden') && quizAnswered) {
+          e.preventDefault();
+          nextQuestion();
+        } else if (!document.getElementById('view-kuis').classList.contains('hidden') && quickQuiz && quickQuiz.answered) {
+          e.preventDefault();
+          nextQuickQuestion();
+        }
+      });
     }
 
     // Schedule Rendering
@@ -2716,6 +3056,10 @@
         localStorage.removeItem('teman_belajar_state');
         appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
         saveState();
+        quizInProgress = false;
+        activeQuizItem = null;
+        renderQuickQuizHome();
+        renderLatihanView();
         renderAll();
         showToast('Data Direset', 'Aplikasi telah kembali ke status awal.');
       }
@@ -2758,10 +3102,17 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       renderAll();
-      displayFlashcard(); // show first card without counting it as "seen"
+      initQuizInputs();
+      renderLatihanView();
 
       // If user is opening for the very first time, show the intro first, then invite to check-in
-      if (!localStorage.getItem('teman_belajar_state')) {
+      let isFirstVisit = true;
+      try {
+        isFirstVisit = !localStorage.getItem('teman_belajar_state');
+      } catch (e) {
+        // storage diblokir: anggap kunjungan pertama
+      }
+      if (isFirstVisit) {
         setTimeout(() => {
           openWelcomeModal();
         }, 600);
