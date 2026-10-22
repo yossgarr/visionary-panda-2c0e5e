@@ -655,6 +655,10 @@
           <!-- Pemilih materi (tampil jika belum ada latihan yang berjalan) -->
           <div id="quiz-picker-box" class="space-y-5">
             <p class="text-sm text-gray-600">Pilih materi Kelas <span id="quiz-picker-grade" class="font-bold text-brand-700">8</span> yang ingin kamu latih. Tiap materi berisi 3 soal isian singkat.</p>
+            <div id="quiz-picker-filter" class="hidden flex items-center justify-between gap-3 px-4 py-2 rounded-2xl bg-sky-50 border border-sky-200 text-xs text-sky-800">
+              <span>Menampilkan mapel pilihanmu: <strong id="quiz-picker-filter-name">Matematika</strong></span>
+              <button type="button" onclick="showAllLatihanSubjects()" class="font-bold underline whitespace-nowrap">Tampilkan semua mapel</button>
+            </div>
             <div id="quiz-picker-list" class="space-y-5">
               <!-- Injected by JS -->
             </div>
@@ -2063,8 +2067,35 @@
 
       closeCheckinModal();
       renderAll();
-      showToast('🌱 Check-in Berhasil!', 'Materi telah disesuaikan & kamu mendapat +1 Ember Air!');
+      const destination = goToCheckinDestination();
+      showToast('🌱 Check-in Berhasil!', `+1 Ember Air! Membuka ${destination}.`);
       triggerConfetti();
+    }
+
+    // Setelah check-in, langsung buka halaman sesuai pilihan gaya belajar (lengkap dengan kelas & mapel pilihan)
+    const CHECKIN_DESTINATIONS = {
+      membaca: { tab: 'materi', label: 'Materi' },
+      contoh: { tab: 'materi', label: 'Materi' },
+      soal: { tab: 'latihan', label: 'Latihan Soal' },
+      kuis: { tab: 'kuis', label: 'Kuis Cepat' },
+      game: { tab: 'garden', label: 'Study Garden' }
+    };
+
+    function goToCheckinDestination() {
+      const dest = CHECKIN_DESTINATIONS[appState.learningStyle] || CHECKIN_DESTINATIONS.membaca;
+
+      if (dest.tab === 'materi') {
+        filterGrade(appState.grade);
+        filterSubject(appState.subject);
+      } else if (dest.tab === 'latihan') {
+        quizInProgress = false; // check-in baru = mulai dari pemilih materi
+        latihanSubjectFilter = appState.subject;
+      }
+
+      switchTab(dest.tab);
+
+      if (dest.tab === 'garden') return `${dest.label} (Kelas ${appState.grade})`;
+      return `${dest.label}: Kelas ${appState.grade} • ${appState.subjectName}`;
     }
 
     /* ==============================================================
@@ -2436,6 +2467,12 @@
     let quizScore = 0;
     let quizAnswered = false;
     let quizInProgress = false;
+    let latihanSubjectFilter = null; // mapel pilihan check-in; null = tampilkan semua mapel
+
+    function showAllLatihanSubjects() {
+      latihanSubjectFilter = null;
+      renderLatihanView();
+    }
 
     function setNextButtonState(btn, enabled, label) {
       btn.disabled = !enabled;
@@ -2471,9 +2508,16 @@
       document.getElementById('quiz-runner-subtitle').textContent = 'Ketik jawabanmu. Kalau belum tepat, kunci jawaban akan ditampilkan beserta pembahasannya.';
       document.getElementById('quiz-picker-grade').textContent = appState.grade;
 
+      const filterNote = document.getElementById('quiz-picker-filter');
+      filterNote.classList.toggle('hidden', !latihanSubjectFilter);
+      if (latihanSubjectFilter) {
+        document.getElementById('quiz-picker-filter-name').textContent = SUBJECT_META[latihanSubjectFilter].name;
+      }
+
       const list = document.getElementById('quiz-picker-list');
       list.innerHTML = '';
       Object.keys(SUBJECT_META).forEach(subject => {
+        if (latihanSubjectFilter && subject !== latihanSubjectFilter) return;
         const items = CURRICULUM_DATA.filter(m => m.grade === appState.grade && m.subject === subject && m.questions.length);
         if (!items.length) return;
         const group = document.createElement('div');
